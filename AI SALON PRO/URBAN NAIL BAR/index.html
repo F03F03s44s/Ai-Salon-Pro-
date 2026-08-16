@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Nail Bar — Home</title>
+    <link rel="stylesheet" href="shared/styles.css?v=20260801sierra1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --home-bg: #0b0b0b;
+            --home-panel: #141414;
+            --home-line: #2a2a2a;
+            --home-gold: #fbbf24;
+            --home-muted: #9ca3af;
+            --home-text: #f3f4f6;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            height: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: var(--home-bg);
+            color: var(--home-text);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background:
+                radial-gradient(ellipse 70% 40% at 50% -8%, rgba(251,191,36,0.1), transparent 55%),
+                #0b0b0b;
+            text-transform: uppercase;
+        }
+        input[type="password"], input[type="email"], input[type="tel"], input[type="number"], .no-caps {
+            text-transform: none;
+        }
+
+        .home-shell {
+            width: 100%;
+            max-width: 1180px;
+            min-height: 100vh;
+            /* 100dvh ignored on Sierra Safari; keep min-height so content is never clipped */
+            margin: 0 auto;
+            padding: 14px 18px 10px;
+            display: flex;
+            flex-direction: column;
+            /* flex gap unsupported until Safari 14.1 — margins below */
+            overflow: visible;
+        }
+        .home-shell > * + * { margin-top: 10px; }
+
+        .home-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--home-line);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .brand h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--home-gold);
+            line-height: 1.1;
+        }
+        .brand p {
+            margin: 2px 0 0;
+            font-size: 0.75rem;
+            color: var(--home-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 420px;
+        }
+        .home-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-decoration: none;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .btn-primary { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; }
+        .btn-ghost {
+            background: transparent;
+            color: var(--home-gold);
+            border-color: rgba(251,191,36,0.45);
+        }
+
+        .home-main {
+            flex: 1 1 auto;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+        }
+        .home-main > * + * { margin-top: 12px; }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            flex: 1 1 auto;
+        }
+        .section > * + * { margin-top: 8px; }
+        .section-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .section-head h2 {
+            margin: 0;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--home-muted);
+        }
+        .section-head span { font-size: 0.75rem; color: #6b7280; }
+
+        .portal-grid {
+            display: grid;
+            grid-gap: 12px;
+            gap: 12px;
+            min-height: 0;
+            flex: 1 1 auto;
+        }
+        .portal-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .portal-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        .portal-card {
+            background: var(--home-panel);
+            border: 1px solid var(--home-line);
+            border-radius: 14px;
+            padding: 16px 18px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 108px;
+            justify-content: center;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .portal-card:hover {
+            border-color: rgba(251,191,36,0.55);
+            background: #181818;
+        }
+        .portal-card .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .portal-card .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(251,191,36,0.1);
+            border: 1px solid rgba(251,191,36,0.25);
+            color: var(--home-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .portal-card .badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: rgba(251,191,36,0.12);
+            color: var(--home-gold);
+            border: 1px solid rgba(251,191,36,0.25);
+            white-space: nowrap;
+        }
+        .portal-card .badge.lock {
+            background: rgba(220,38,38,0.1);
+            color: #fca5a5;
+            border-color: rgba(220,38,38,0.3);
+        }
+        .portal-card h3 {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+        }
+        .portal-card p {
+            margin: 0;
+            font-size: 0.8rem;
+            line-height: 1.35;
+            color: var(--home-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .section.staff-desk .portal-card {
+            min-height: 100px;
+        }
+
+        .phone-setup {
+            flex-shrink: 0;
+            display: grid;
+            grid-template-columns: 1fr minmax(340px, auto);
+            grid-gap: 48px;
+            gap: 48px;
+            align-items: center;
+            background: var(--home-panel);
+            border: 1px solid var(--home-line);
+            border-radius: 14px;
+            padding: 20px 24px;
+            min-height: 180px;
+        }
+        .phone-setup h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--home-gold);
+        }
+        .phone-setup .ps-steps {
+            margin: 0 0 10px;
+            font-size: 0.82rem;
+            line-height: 1.55;
+            color: var(--home-muted);
+        }
+        .phone-setup .ps-steps b { color: #e5e7eb; }
+        .phone-setup code {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 0.78rem;
+        }
+        .ps-url {
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1.55;
+            word-break: break-all;
+            max-height: none;
+            overflow: visible;
+        }
+        .ps-url a { color: var(--home-gold); text-decoration: none; }
+        .ps-url .warn { color: #f87171; }
+        .ps-url .lbl {
+            color: #6b7280;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .ps-qrs {
+            display: flex;
+            gap: 64px;
+            padding: 8px 12px 8px 32px;
+            margin-left: 8px;
+            border-left: 1px solid var(--home-line);
+            justify-content: flex-end;
+        }
+        .ps-qrbox {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--home-muted);
+            text-align: center;
+            min-width: 148px;
+            padding: 14px 14px 12px;
+            background: #0f0f0f;
+            border: 1px solid #2a2a2a;
+            border-radius: 14px;
+        }
+        .ps-qr {
+            background: #fff;
+            padding: 12px;
+            border-radius: 14px;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.7rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            border: 4px solid #fff;
+            outline: 1px solid #e5e7eb;
+        }
+        .ps-qr img, .ps-qr canvas { display: block; max-width: 100%; height: auto; }
+
+        .home-footer {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: nowrap;
+            font-size: 0.68rem;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .home-footer span.status { color: #86efac; font-weight: 700; }
+        .home-footer #sessionInfo {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .home-footer #sessionInfo a { color: #f87171; text-decoration: none; font-weight: 700; }
+
+        @media (max-width: 900px) {
+            html, body { overflow: auto; }
+            .home-shell { height: auto; min-height: 100vh; overflow: visible; }
+            .portal-grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .phone-setup { grid-template-columns: 1fr; gap: 18px; }
+            .ps-qrs {
+                justify-content: center;
+                border-left: none;
+                padding: 14px 0 0;
+                margin-left: 0;
+                border-top: 1px solid var(--home-line);
+                gap: 64px;
+            }
+            .brand p { white-space: normal; }
+        }
+        @media (max-width: 560px) {
+            .portal-grid.two, .portal-grid.four { grid-template-columns: 1fr; }
+            .home-top { flex-direction: column; align-items: flex-start; }
+        }
+        /* Short laptop screens at 100% zoom */
+        @media (max-height: 780px) {
+            .home-shell { padding: 10px 14px 8px; }
+            .home-shell > * + * { margin-top: 8px; }
+            .home-main > * + * { margin-top: 9px; }
+            .portal-grid { grid-gap: 9px; gap: 9px; }
+            .portal-card {
+                padding: 12px 14px;
+                min-height: 88px;
+                border-radius: 12px;
+            }
+            .portal-card .icon { width: 34px; height: 34px; font-size: 0.9rem; }
+            .portal-card h3 { font-size: 0.95rem; }
+            .portal-card p { font-size: 0.74rem; -webkit-line-clamp: 1; }
+            .section.staff-desk .portal-card { min-height: 82px; }
+            .phone-setup { padding: 14px 16px; min-height: 148px; grid-gap: 32px; gap: 32px; }
+            .ps-qr { width: 116px; height: 116px; padding: 10px; }
+            .ps-qrs { grid-gap: 48px; gap: 48px; }
+            .ps-qrbox { min-width: 124px; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="home-shell">
+        <header class="home-top">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">UNB</div>
+                <div>
+                    <h1>Urban Nail Bar</h1>
+                    <p>Salon home — clients, front desk, and management in one place.</p>
+                </div>
+            </div>
+            <div class="home-actions">
+                <a class="btn btn-primary" href="http://localhost:3002/"><i class="fas fa-calendar-check"></i> Book Appointment</a>
+                <a class="btn btn-ghost" href="pages/website.html"><i class="fas fa-globe"></i> Website</a>
+            </div>
+        </header>
+
+        <div class="home-main">
+            <section class="section">
+                <div class="section-head">
+                    <h2>For Clients</h2>
+                    <span>Public</span>
+                </div>
+                <div class="portal-grid two">
+                    <a href="pages/website.html" class="portal-card">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-globe"></i></div>
+                            <span class="badge">Public</span>
+                        </div>
+                        <h3>Website</h3>
+                        <p>Services, team, contact, and AI guest assistant.</p>
+                    </a>
+                    <a href="http://localhost:3002/" class="portal-card">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-calendar-check"></i></div>
+                            <span class="badge">Public</span>
+                        </div>
+                        <h3>Book Online</h3>
+                        <p>Sign in with phone, then pick a service — syncs live.</p>
+                    </a>
+                </div>
+            </section>
+
+            <section class="section staff-desk">
+                <div class="section-head">
+                    <h2>Staff &amp; Alert</h2>
+                    <span>PIN required</span>
+                </div>
+                <div class="portal-grid four" id="staffPortalGrid">
+                    <a href="pages/scheduler.html" class="portal-card" id="homeCardScheduler" data-home-card="scheduler">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                            <span class="badge lock"><i class="fas fa-lock"></i> Manager</span>
+                        </div>
+                        <h3>Scheduler</h3>
+                        <p>Day board &amp; checkout</p>
+                    </a>
+                    <a href="pages/staff.html#myschedule" class="portal-card" id="homeCardMySchedule" data-home-card="myschedule" style="display:none;">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-calendar"></i></div>
+                            <span class="badge lock"><i class="fas fa-lock"></i> Staff</span>
+                        </div>
+                        <h3>My Schedule</h3>
+                        <p>Your appointments only</p>
+                    </a>
+                    <a href="pages/staff.html#myschedule" class="portal-card" id="homeCardStaff" data-home-card="staff">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-users"></i></div>
+                            <span class="badge lock"><i class="fas fa-lock"></i> Staff</span>
+                        </div>
+                        <h3>Staff Members</h3>
+                        <p>Schedule &amp; pay</p>
+                    </a>
+                    <a href="pages/sms-blast.html" class="portal-card" id="homeCardSms" data-home-card="alert">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-comment-sms"></i></div>
+                            <span class="badge lock"><i class="fas fa-lock"></i> Alert</span>
+                        </div>
+                        <h3>SMS Blast</h3>
+                        <p>Text booking link</p>
+                    </a>
+                    <a href="pages/reminders.html" class="portal-card" id="homeCardReminders" data-home-card="alert">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-bell"></i></div>
+                            <span class="badge lock"><i class="fas fa-lock"></i> Alert</span>
+                        </div>
+                        <h3>Reminders</h3>
+                        <p>One-tap texts</p>
+                    </a>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-head">
+                    <h2>Management</h2>
+                    <span>Manager &amp; Admin</span>
+                </div>
+                <div class="portal-grid two">
+                    <a href="pages/manager.html" class="portal-card">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-user-tie"></i></div>
+                            <span class="badge lock"><i class="fas fa-lock"></i> Manager</span>
+                        </div>
+                        <h3>Manager</h3>
+                        <p>Operations, reports, inventory, approvals.</p>
+                    </a>
+                    <a href="pages/admin.html" class="portal-card">
+                        <div class="row">
+                            <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                            <span class="badge lock"><i class="fas fa-lock"></i> Admin</span>
+                        </div>
+                        <h3>Admin</h3>
+                        <p>Staff, security, payroll, and backups.</p>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <div class="phone-setup" id="phoneSetup">
+            <div>
+                <h3><i class="fas fa-mobile-alt"></i> Phone Setup</h3>
+                <div class="ps-steps">
+                    Keep <b>OPEN-SALON.bat</b> running · Staff scan Staff Members · Clients scan Book Now · Public: <code>GO-PUBLIC.bat</code>
+                </div>
+                <div class="ps-url" id="psUrl"><i class="fas fa-spinner fa-spin"></i> Finding your phone links…</div>
+            </div>
+            <div class="ps-qrs">
+                <div class="ps-qrbox">
+                    <div class="ps-qr" id="psQrStaff">QR</div>
+                    <span><i class="fas fa-lock"></i> Staff</span>
+                </div>
+                <div class="ps-qrbox">
+                    <div class="ps-qr" id="psQrBook">QR</div>
+                    <span><i class="fas fa-calendar-check"></i> Book</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="home-footer">
+            <div>
+                <i class="fas fa-circle" style="color:#22c55e;font-size:0.5rem;"></i>
+                Status: <span class="status">Live Sync</span> · Urban Nail Bar · v3.0
+            </div>
+            <div id="sessionInfo"></div>
+        </footer>
+    </div>
+
+    <script src="shared/legacy-compat.js?v=20260801sierra1"></script>
+    <script src="shared/data-manager.js?v=20260801sierra1"></script>
+    <script src="shared/utils.js?v=20260801sierra1"></script>
+    <script src="shared/auth.js?v=20260801sierra1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof DataManager !== 'undefined') DataManager.init();
+            renderSessionInfo();
+            applyHomeRoleCards();
+            initPhoneSetup();
+            window.addEventListener('storage', function (e) {
+                if (e.key === (window.SALON_SESSION_KEY || 'aiSalonPro_v3_session')) {
+                    renderSessionInfo();
+                    applyHomeRoleCards();
+                }
+            });
+        });
+
+        function renderSessionInfo() {
+            var el = document.getElementById('sessionInfo');
+            if (!el || typeof SalonAuth === 'undefined') return;
+            var user = SalonAuth.current();
+            if (user) {
+                el.innerHTML = 'Staff: <strong style="color:#e5e7eb;">' + user.name + '</strong> (' + user.role + ')'
+                    + ' · <a href="#" onclick="SalonAuth.logout(); renderSessionInfo(); applyHomeRoleCards(); return false;">Log out</a>';
+            } else {
+                el.innerHTML = 'Staff locked · PIN required';
+            }
+        }
+
+        /**
+         * Role-aware home tiles:
+         * - Manager / Admin / Receptionist → full Scheduler + Alert tools
+         * - Technician-only → My Schedule (not multi-staff Scheduler); Alert tiles stay
+         *   visible but still PIN-gated on those pages
+         * - Logged out → show Scheduler (desk unlock) + Staff Members; hide My Schedule duplicate
+         */
+        function applyHomeRoleCards() {
+            var sched = document.getElementById('homeCardScheduler');
+            var mine = document.getElementById('homeCardMySchedule');
+            var staff = document.getElementById('homeCardStaff');
+            if (!sched || !mine) return;
+
+            var techOnly = typeof SalonAuth !== 'undefined' && SalonAuth.isTechnicianOnly && SalonAuth.isTechnicianOnly();
+            var canSched = typeof SalonAuth !== 'undefined' && SalonAuth.canAccessScheduler && SalonAuth.canAccessScheduler();
+
+            if (techOnly) {
+                sched.style.display = 'none';
+                mine.style.display = '';
+                if (staff) staff.style.display = 'none'; // My Schedule is their calendar entry
+            } else if (canSched) {
+                sched.style.display = '';
+                mine.style.display = 'none';
+                if (staff) staff.style.display = '';
+            } else {
+                // Not logged in: show Scheduler (manager/admin/reception unlock) + Staff portal
+                sched.style.display = '';
+                mine.style.display = 'none';
+                if (staff) staff.style.display = '';
+            }
+        }
+
+        function initPhoneSetup() {
+            var urlEl = document.getElementById('psUrl');
+            var qrStaff = document.getElementById('psQrStaff');
+            var qrBook = document.getElementById('psQrBook');
+            var qrSize = window.matchMedia('(max-height: 780px)').matches ? 100 : 116;
+            fetch('http://localhost:3001/api/lan-info', { cache: 'no-store' })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('server unreachable');
+                    return res.json();
+                })
+                .then(function (info) {
+                    var ip = (info.ips && info.ips[0]) || null;
+                    if (!ip) throw new Error('no LAN address');
+                    var staffBase = 'http://' + ip + ':' + info.port;
+                    var bookBase = 'http://' + ip + ':' + (info.publicPort || 3002);
+                    var urlStaff = staffBase + '/pages/staff.html#myschedule';
+                    var urlBook = bookBase + '/';
+                    urlEl.innerHTML = '<span class="lbl">Staff</span> <a href="' + urlStaff + '" target="_blank" rel="noopener">' + urlStaff + '</a><br>'
+                        + '<span class="lbl">Clients</span> <a href="' + urlBook + '" target="_blank" rel="noopener">' + urlBook + '</a>';
+                    if (typeof QRCode !== 'undefined') {
+                        qrStaff.innerHTML = '';
+                        new QRCode(qrStaff, { text: urlStaff, width: qrSize, height: qrSize, colorDark: '#000000', colorLight: '#ffffff' });
+                        qrBook.innerHTML = '';
+                        new QRCode(qrBook, { text: urlBook, width: qrSize, height: qrSize, colorDark: '#000000', colorLight: '#ffffff' });
+                    } else {
+                        qrStaff.textContent = 'Link';
+                        qrBook.textContent = 'Link';
+                    }
+                })
+                .catch(function () {
+                    urlEl.innerHTML = '<span class="warn"><i class="fas fa-exclamation-triangle"></i> Start OPEN-SALON.bat and reload.</span>';
+                    qrStaff.textContent = 'Off';
+                    qrBook.textContent = 'Off';
+                });
+        }
+    </script>
+</body>
+</html>

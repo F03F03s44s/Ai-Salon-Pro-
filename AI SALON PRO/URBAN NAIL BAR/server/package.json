@@ -1,0 +1,19 @@
+{
+  "name": "kimi-salon-proxy",
+  "version": "1.0.0",
+  "description": "Kimi API Proxy for AI Salon Pro",
+  "main": "kimi-proxy-server.js",
+  "scripts": {
+    "start": "node kimi-proxy-server.js",
+    "dev": "nodemon kimi-proxy-server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

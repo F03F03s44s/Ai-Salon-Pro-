@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confirm Appointment — Urban Nail Bar</title>
+<link rel="stylesheet" href="/shared/styles.css?v=20260731bold">
+<style>
+body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0a0a0a; padding: 20px; }
+.card { max-width: 420px; width: 100%; background: #141414; border: 2px solid var(--primary, #fbbf24); border-radius: 14px; padding: 28px 22px; text-align: center; }
+.card h1 { color: var(--primary, #fbbf24); font-size: 1.25rem; margin-bottom: 8px; }
+.card p { color: #9ca3af; font-size: 0.9rem; line-height: 1.5; margin-bottom: 16px; }
+.btn { display: inline-block; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; border: none; padding: 12px 22px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.95rem; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.ok { color: #4ade80; font-weight: 800; font-size: 1.05rem; }
+.err { color: #f87171; font-weight: 700; }
+.meta { background: #0f0f0f; border: 1px solid #333; border-radius: 8px; padding: 12px; text-align: left; margin: 14px 0; font-size: 0.85rem; color: #e5e7eb; }
+</style>
+</head>
+<body>
+<div class="card">
+    <h1>Urban Nail Bar</h1>
+    <p id="msg">Confirming your appointment…</p>
+    <div id="details" class="meta" style="display:none;"></div>
+    <button id="confirmBtn" class="btn" style="display:none;" onclick="doConfirm()">Yes, I'm coming</button>
+</div>
+<script>
+(function () {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token') || '';
+    const msg = document.getElementById('msg');
+    const details = document.getElementById('details');
+    const btn = document.getElementById('confirmBtn');
+
+    if (!token) {
+        msg.innerHTML = '<span class="err">This confirmation link is missing a token.</span>';
+        return;
+    }
+
+    // Prefer public API (port 3002); fall back to staff origin API
+    const apiBases = [
+        location.origin,
+        location.origin.replace(':3001', ':3002'),
+        'http://localhost:3002',
+        'http://localhost:3001'
+    ].filter((v, i, a) => a.indexOf(v) === i);
+
+    async function lookup() {
+        for (const base of apiBases) {
+            try {
+                const r = await fetch(base + '/api/public/confirm-info?token=' + encodeURIComponent(token));
+                if (!r.ok) continue;
+                const data = await r.json();
+                if (data && data.ok) {
+                    window.__confirmBase = base;
+                    msg.textContent = data.already
+                        ? 'You already confirmed this appointment. See you soon!'
+                        : 'Please confirm you are still coming:';
+                    if (data.already) msg.className = 'ok';
+                    details.style.display = 'block';
+                    details.innerHTML =
+                        '<div><strong>Client:</strong> ' + (data.clientName || '—') + '</div>' +
+                        '<div><strong>Date:</strong> ' + (data.date || '—') + '</div>' +
+                        '<div><strong>Time:</strong> ' + (data.time || '—') + '</div>';
+                    if (!data.already) btn.style.display = 'inline-block';
+                    return;
+                }
+                if (data && data.error) {
+                    msg.innerHTML = '<span class="err">' + data.error + '</span>';
+                    return;
+                }
+            } catch (e) {}
+        }
+        // Offline / localStorage fallback (same browser as salon)
+        try {
+            const raw = localStorage.getItem('aiSalonPro_v3_data');
+            if (raw) {
+                const store = JSON.parse(raw);
+                const appt = (store.appointments || []).find(a => a.confirmToken === token);
+                if (appt) {
+                    window.__localConfirm = true;
+                    msg.textContent = appt.clientConfirmed
+                        ? 'You already confirmed this appointment. See you soon!'
+                        : 'Please confirm you are still coming:';
+                    if (appt.clientConfirmed) msg.className = 'ok';
+                    details.style.display = 'block';
+                    details.innerHTML =
+                        '<div><strong>Client:</strong> ' + (appt.clientName || '—') + '</div>' +
+                        '<div><strong>Date:</strong> ' + (appt.date || '—') + '</div>' +
+                        '<div><strong>Time:</strong> ' + (appt.time || '—') + '</div>';
+                    if (!appt.clientConfirmed) btn.style.display = 'inline-block';
+                    return;
+                }
+            }
+        } catch (e) {}
+        msg.innerHTML = '<span class="err">Could not find this appointment. Ask the salon to resend your reminder.</span>';
+    }
+
+    window.doConfirm = async function () {
+        btn.disabled = true;
+        if (window.__localConfirm) {
+            try {
+                const store = JSON.parse(localStorage.getItem('aiSalonPro_v3_data') || '{}');
+                const appt = (store.appointments || []).find(a => a.confirmToken === token);
+                if (appt) {
+                    appt.clientConfirmed = true;
+                    appt.clientConfirmedAt = new Date().toISOString();
+                    appt.reminders = appt.reminders || {};
+                    appt.reminders.confirmed = true;
+                    store.notifications = store.notifications || [];
+                    store.notifications.push({
+                        id: Date.now(),
+                        type: 'booking',
+                        title: 'Client Confirmed',
+                        message: (appt.clientName || 'Client') + ' confirmed they are coming — ' + appt.date + ' ' + (appt.time || ''),
+                        time: new Date().toLocaleTimeString(),
+                        read: false,
+                        createdAt: new Date().toISOString()
+                    });
+                    localStorage.setItem('aiSalonPro_v3_data', JSON.stringify(store));
+                    localStorage.setItem('aiSalonPro_v3_lastSync', Date.now().toString());
+                }
+                msg.innerHTML = '<span class="ok">Confirmed! Thank you — we look forward to seeing you.</span>';
+                btn.style.display = 'none';
+                return;
+            } catch (e) {
+                msg.innerHTML = '<span class="err">Could not save confirmation locally.</span>';
+                btn.disabled = false;
+                return;
+            }
+        }
+        try {
+            const base = window.__confirmBase || apiBases[0];
+            const r = await fetch(base + '/api/public/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token })
+            });
+            const data = await r.json();
+            if (data && data.ok) {
+                msg.innerHTML = '<span class="ok">Confirmed! Thank you — we look forward to seeing you.</span>';
+                btn.style.display = 'none';
+            } else {
+                msg.innerHTML = '<span class="err">' + ((data && data.error) || 'Confirmation failed') + '</span>';
+                btn.disabled = false;
+            }
+        } catch (e) {
+            msg.innerHTML = '<span class="err">Network error — please call the salon.</span>';
+            btn.disabled = false;
+        }
+    };
+
+    lookup();
+})();
+</script>
+</body>
+</html>

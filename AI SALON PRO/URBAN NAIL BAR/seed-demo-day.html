@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Salon Pro - Demo Day Seeder</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0f0f0f;
+            color: #e5e7eb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 36px;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .logo { font-size: 3rem; margin-bottom: 12px; }
+        h1 { color: #fbbf24; font-size: 1.5rem; margin-bottom: 8px; }
+        .sub { color: #9ca3af; font-size: 0.9rem; margin-bottom: 24px; }
+        .status {
+            background: #0f0f0f;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+        .status.success { border-color: #16a34a; }
+        .status.error { border-color: #dc2626; }
+        .status .big { font-size: 1.15rem; font-weight: 800; color: #4ade80; display: block; margin-bottom: 6px; }
+        .status .big.err { color: #f87171; }
+        .stat-row { display: flex; justify-content: space-around; margin-top: 10px; }
+        .stat { text-align: center; }
+        .stat .v { font-size: 1.4rem; font-weight: 800; color: #fbbf24; }
+        .stat .l { font-size: 0.65rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btns { display: flex; flex-direction: column; gap: 10px; }
+        a.btn, button.btn {
+            display: block;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+        }
+        a.btn-primary { background: #fbbf24; color: #000; }
+        a.btn-secondary { background: #262626; color: #e5e7eb; border: 1px solid #404040; }
+        button.btn-danger { background: transparent; color: #f87171; border: 1px solid #dc2626; }
+        button.btn-danger:hover { background: rgba(220,38,38,0.1); }
+        .note { margin-top: 18px; font-size: 0.75rem; color: #6b7280; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">💅</div>
+        <h1>AI Salon Pro — Demo Day Seeder</h1>
+        <p class="sub">This seeds one realistic demo day into your salon's local data</p>
+
+        <div class="status" id="statusBox">
+            <i class="fas fa-spinner fa-spin"></i> Loading demo day…
+        </div>
+
+        <div class="btns" id="btnBox" style="display:none;">
+            <a class="btn btn-primary" href="pages/manager.html"><i class="fas fa-user-tie"></i> Open Manager Dashboard</a>
+            <a class="btn btn-secondary" href="pages/scheduler.html"><i class="fas fa-calendar-alt"></i> Open Scheduler</a>
+            <a class="btn btn-secondary" href="pages/admin.html"><i class="fas fa-shield-alt"></i> Open Admin</a>
+            <button class="btn btn-danger" onclick="wipeDemo()"><i class="fas fa-eraser"></i> Remove Demo Data</button>
+        </div>
+
+        <p class="note">Demo records are tagged and never mix with real data.<br>
+        You can also remove them anytime from Admin → Data &amp; Backups → Demo &amp; Training,<br>
+        or the 🧹 Clear Demo button on the Manager dashboard.</p>
+    </div>
+
+    <script src="shared/data-manager.js"></script>
+    <script>
+        function showResult(res) {
+            const box = document.getElementById('statusBox');
+            box.classList.add('success');
+            box.innerHTML = `
+                <span class="big"><i class="fas fa-check-circle"></i> Demo day is loaded!</span>
+                Your salon data now contains a full realistic day:
+                <div class="stat-row">
+                    <div class="stat"><div class="v">${res.appointments}</div><div class="l">Appointments</div></div>
+                    <div class="stat"><div class="v">${res.reviews}</div><div class="l">Reviews</div></div>
+                    <div class="stat"><div class="v">${res.clockIns}</div><div class="l">Clock-Ins</div></div>
+                </div>
+                <div style="margin-top:10px; color:#9ca3af; font-size:0.8rem;">
+                    Including a multi-staff split ticket, walk-ins, a pending booking, and a cancelled walk-in.
+                </div>`;
+            document.getElementById('btnBox').style.display = 'flex';
+        }
+
+        function showError(err) {
+            const box = document.getElementById('statusBox');
+            box.classList.add('error');
+            box.innerHTML = `<span class="big err"><i class="fas fa-exclamation-triangle"></i> Something went wrong</span>${err}`;
+        }
+
+        function wipeDemo() {
+            const removed = DataManager.removeDemoData();
+            const box = document.getElementById('statusBox');
+            box.classList.remove('success');
+            box.classList.add('error');
+            box.innerHTML = `<span class="big err"><i class="fas fa-eraser"></i> Demo data removed</span>${removed} demo records wiped. Real data was not touched.`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const res = DataManager.loadDemoDay();
+                showResult(res);
+            } catch (e) {
+                showError(e.message || e);
+            }
+        });
+    </script>
+</body>
+</html>

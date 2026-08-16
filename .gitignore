@@ -1,0 +1,11 @@
+# Nested app ignores (also in AI SALON PRO/URBAN NAIL BAR/.gitignore)
+**/server/node_modules/
+**/node_modules/
+**/server/.env
+**/server/dnsexit.env
+**/server/.auth-secret
+**/server/data-store.json
+**/server/data-store.json.bak
+**/server/caddy.exe
+**/server/caddy
+**/.DS_Store
