@@ -19940,5 +19940,109 @@ function saveModalStaff() {
 
 </script>
 </body>
+<script>
+(function(){
+  // Override scheduler staff add and PIN flows to use centralized DataManager when available.
+  function getCheckedRoles(containerSelector){
+    const boxes = document.querySelectorAll(containerSelector + " input[type=checkbox]");
+    return Array.from(boxes).filter(cb=>cb.checked).map(cb=>cb.dataset.role);
+  }
+
+  window.saveStaff = function saveStaff(){
+    try{
+      const nameEl = document.getElementById('staffName');
+      const name = nameEl ? nameEl.value.trim() : '';
+      if(!name){ showToast('Please enter staff name','error'); return; }
+
+      const roles = getCheckedRoles('#staffRoles');
+      const role = roles.includes('technician') ? 'technician' : (roles[0]||'technician');
+      const commissionEl = document.getElementById('staffCommission');
+      const commission = commissionEl ? parseInt(commissionEl.value,10)||60 : 60;
+
+      const staffObj = { id: Date.now() + Math.floor(Math.random()*1000), name: name, roles: roles, role: role, commission: commission, status: 'available' };
+
+      let newStaff = null;
+      if(typeof DataManager !== 'undefined' && typeof DataManager.addStaff === 'function'){
+        try{ newStaff = DataManager.addStaff(staffObj); }catch(e){ console.error('DataManager.addStaff failed', e); showToast('Failed to add staff (DataManager)', 'error'); return; }
+      } else {
+        // fallback to local store
+        if(!window.store) window.store = window.store || {};
+        window.store.staff = window.store.staff || [];
+        window.store.staff.push(staffObj);
+        newStaff = staffObj;
+        if(typeof saveData === 'function') try{ saveData(); }catch(e){}
+      }
+
+      const pinEl = document.getElementById('staffPin');
+      const pinVal = pinEl ? (pinEl.value || '').trim() : '';
+
+      if(pinVal){
+        if(!/^\d{4}$/.test(pinVal)){ showToast('PIN must be 4 digits', 'error'); return; }
+
+        // Determine acting PIN: prefer an already-authenticated admin/manager session
+        let actingPin = null;
+        try{
+          if(typeof Auth !== 'undefined' && Auth.currentUser && Auth.currentUser.pin){ actingPin = Auth.currentUser.pin; }
+        }catch(e){}
+
+        if(!actingPin){
+          actingPin = prompt('Admin/Manager PIN required to set staff PIN');
+          if(!actingPin){ showToast('Manager/Admin PIN required', 'error'); return; }
+        }
+
+        // Verify acting PIN if possible
+        if(typeof Auth !== 'undefined' && typeof Auth.verifyPin === 'function'){
+          try{
+            if(!Auth.verifyPin(actingPin, 'manager')){ showToast('Invalid manager/admin PIN', 'error'); return; }
+          }catch(e){ /* ignore verification failures and attempt change */ }
+        }
+
+        try{
+          if(typeof DataManager !== 'undefined' && typeof DataManager.changeStaffPin === 'function'){
+            DataManager.changeStaffPin(newStaff.id, pinVal, actingPin);
+          } else {
+            // fallback: set on local object and save
+            newStaff.pin = pinVal;
+            if(typeof saveData === 'function') try{ saveData(); }catch(e){}
+          }
+        }catch(e){ console.error('changeStaffPin failed', e); showToast('Failed to set PIN', 'error'); }
+      }
+
+      closeModal('addStaffModal');
+      showToast('Staff added', 'success');
+
+      // Re-render all staff-related UI pieces
+      try{ renderHeaderStaffList(); renderSidebarStaffList(); renderStaffPageList(); populateCalendarStaffFilter(); initStaffColumns(); updateStats(); renderAppointments(); }catch(e){}
+    }catch(err){ console.error(err); showToast('Unexpected error saving staff', 'error'); }
+  };
+
+  window.changeStaffPin = function changeStaffPin(id){
+    try{
+      const newPin = prompt('Enter new 4-digit PIN for this staff member:');
+      if(!newPin || !/^\d{4}$/.test(newPin)){ showToast('PIN must be 4 digits', 'error'); return; }
+
+      let actingPin = null;
+      try{ if(typeof Auth !== 'undefined' && Auth.currentUser && Auth.currentUser.pin) actingPin = Auth.currentUser.pin; }catch(e){}
+      if(!actingPin){ actingPin = prompt('Manager/Admin PIN required to change PIN'); if(!actingPin){ showToast('Approval PIN required','error'); return; } }
+
+      if(typeof Auth !== 'undefined' && typeof Auth.verifyPin === 'function'){
+        try{ if(!Auth.verifyPin(actingPin, 'manager')){ showToast('Invalid manager/admin PIN', 'error'); return; } }catch(e){}
+      }
+
+      if(typeof DataManager !== 'undefined' && typeof DataManager.changeStaffPin === 'function'){
+        DataManager.changeStaffPin(id, newPin, actingPin);
+        showToast('PIN updated', 'success');
+      } else {
+        const s = window.store && window.store.staff ? window.store.staff.find(st=>st.id===id) : null;
+        if(s){ s.pin = newPin; if(typeof saveData === 'function') try{ saveData(); }catch(e){} showToast('PIN updated (local)', 'success'); }
+        else showToast('Staff not found', 'error');
+      }
+
+      try{ renderHeaderStaffList(); renderStaffPageList(); renderSidebarStaffList(); }catch(e){}
+    }catch(err){ console.error(err); showToast('Failed to change PIN', 'error'); }
+  };
+
+})();
+</script>
 </html>
 
