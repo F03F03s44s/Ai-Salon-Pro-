@@ -1863,13 +1863,47 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 }
 
 .calendar-legend {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    padding: 8px 10px;
+    position: relative;
+    padding: 6px 10px;
     background: #111827;
     border-top: 1px solid #374151;
     border-bottom: 1px solid #374151;
+}
+
+.calendar-legend-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    background: #1f2937;
+    border: 1px solid #6b7280;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.calendar-legend-toggle:hover,
+.calendar-legend-toggle:focus-visible {
+    background: #374151;
+    outline: 2px solid var(--theme-primary);
+    outline-offset: 2px;
+}
+
+.calendar-legend-content {
+    display: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 6px;
+    padding: 8px;
+    background: #111827;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+}
+
+.calendar-legend.open .calendar-legend-content {
+    display: grid;
 }
 
 .calendar-legend-panel {
@@ -1922,9 +1956,8 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 }
 
 @media (max-width: 900px) {
-    .calendar-legend { grid-template-columns: 1fr; }
+    .calendar-legend-content { grid-template-columns: 1fr; }
 }
-
 
 
 .week-grid { display: grid; grid-template-columns: 60px repeat(7, 1fr); gap: 1px; background: #e5e7eb; border: 1px solid #333; }
@@ -3379,7 +3412,7 @@ body.is-appt-dragging .appt-block * {
 
                         <div class="cal-pill" onclick="openAllAppointmentsModal('queued')" style="display:flex; align-items:center; gap:4px; background:#16a34a; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span style="text-shadow:0 1px 3px rgba(0,0,0,0.85);">Arrived</span><span id="calStatQueued" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
-                        <div class="cal-pill" onclick="openAllAppointmentsModal('checkout')" style="display:flex; align-items:center; gap:4px; background:#f97316; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span style="text-shadow:0 1px 3px rgba(0,0,0,0.85);">Payment</span><span id="calStatCheckout" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
+                        <div class="cal-pill" onclick="openAllAppointmentsModal('checkout')" style="display:flex; align-items:center; gap:4px; background:#f59e0b; color:#111827; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span>Payment Ready</span><span id="calStatCheckout" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
                         <div class="cal-pill" onclick="openAllAppointmentsModal('complete')" style="display:flex; align-items:center; gap:4px; background:#000; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:2px 8px; border-radius:10px; font-size:0.6rem; font-weight:800; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span>Finalized</span><span id="calStatComplete" style="background:var(--theme-primary); color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
@@ -3403,53 +3436,32 @@ body.is-appt-dragging .appt-block * {
 
                 </div>
 
-                <div class="calendar-legend" aria-label="Calendar color and icon descriptions">
-                    <div class="calendar-legend-panel">
-                        <div class="calendar-legend-title"><i class="fas fa-palette" aria-hidden="true"></i> Colors</div>
-                        <div class="calendar-legend-grid">
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#fbbf24;"></span>Salon Appointment</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#8b5cf6;"></span>Online Booking</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#16a34a;"></span>Appointment Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#64748b;"></span>Ticket Note</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#3b82f6;"></span>Walk-in Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#2563eb;"></span>Waiting Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#f97316;"></span>Servicing Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#ea580c;"></span>In Servicing Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#eab308;"></span>Pending Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#22c55e;"></span>Done Service Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#a855f7;"></span>Request Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#ec4899;"></span>Special Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#06b6d4;"></span>Group Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#14b8a6;"></span>Combine Tickets</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#84cc16;"></span>Payment Attached</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#f59e0b;"></span>Reminder</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#10b981;"></span>Confirm</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#ef4444;"></span>Canceled</div>
-                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#991b1b;"></span>No Show</div>
+                <div class="calendar-legend" id="calendarLegend">
+                    <button class="calendar-legend-toggle" type="button" aria-expanded="false" aria-controls="calendarLegendContent" onclick="toggleCalendarLegend()">
+                        <i class="fas fa-palette" aria-hidden="true"></i> Colors &amp; Icons <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                    <div class="calendar-legend-content" id="calendarLegendContent">
+                        <div class="calendar-legend-panel">
+                            <div class="calendar-legend-title">Colors</div>
+                            <div class="calendar-legend-grid">
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#fbbf24;"></span>Gold: complete / finished / client ready to leave</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#2563eb;"></span>Blue: waiting / in progress / up next / queued</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#16a34a;"></span>Green: checked-in / payment paid / transaction accepted</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#dc2626;"></span>Red: late / not checked-in / incomplete / declined</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#f59e0b;"></span>Yellow: ready for checkout / ready to pay / payment processing</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="calendar-legend-panel">
-                        <div class="calendar-legend-title"><i class="fas fa-icons" aria-hidden="true"></i> Icons</div>
-                        <div class="calendar-legend-grid">
-                            <div class="calendar-legend-item"><i class="fas fa-calendar-check"></i>Salon Appointment</div>
-                            <div class="calendar-legend-item"><i class="fas fa-globe"></i>Online Booking</div>
-                            <div class="calendar-legend-item"><i class="fas fa-ticket-alt"></i>Appointment Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-sticky-note"></i>Ticket Note</div>
-                            <div class="calendar-legend-item"><i class="fas fa-walking"></i>Walk-in Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-hourglass-half"></i>Waiting Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-concierge-bell"></i>Servicing Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-spinner"></i>In Servicing Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-hourglass-start"></i>Pending Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-check-double"></i>Done Service Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-hand-paper"></i>Request Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-star"></i>Special Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-users"></i>Group Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-link"></i>Combine Tickets</div>
-                            <div class="calendar-legend-item"><i class="fas fa-money-check-alt"></i>Payment Attached</div>
-                            <div class="calendar-legend-item"><i class="fas fa-bell"></i>Reminder</div>
-                            <div class="calendar-legend-item"><i class="fas fa-check-circle"></i>Confirm</div>
-                            <div class="calendar-legend-item"><i class="fas fa-ban"></i>Canceled</div>
-                            <div class="calendar-legend-item"><i class="fas fa-user-slash"></i>No Show</div>
+                        <div class="calendar-legend-panel">
+                            <div class="calendar-legend-title">Icons</div>
+                            <div class="calendar-legend-grid">
+                                <div class="calendar-legend-item"><i class="fas fa-check-double"></i>Complete / finished</div>
+                                <div class="calendar-legend-item"><i class="fas fa-hourglass-half"></i>Waiting / queued</div>
+                                <div class="calendar-legend-item"><i class="fas fa-spinner"></i>In progress / processing</div>
+                                <div class="calendar-legend-item"><i class="fas fa-check-circle"></i>Checked-in / accepted / paid</div>
+                                <div class="calendar-legend-item"><i class="fas fa-cash-register"></i>Ready for checkout / payment</div>
+                                <div class="calendar-legend-item"><i class="fas fa-clock"></i>Late / not checked-in</div>
+                                <div class="calendar-legend-item"><i class="fas fa-ban"></i>Incomplete / declined / canceled</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -10261,7 +10273,7 @@ function renderAppointments() {
 
         const laneLeftPct = lane * laneWidthPct;
 
-        const statusBorderColors = { waiting: '#2563eb', next: '#2563eb', queued: '#16a34a', late: '#dc2626', checkout: '#f97316', ready: 'var(--theme-primary)', complete: 'var(--theme-primary)', noshow: '#dc2626' };
+        const statusBorderColors = { waiting: '#2563eb', next: '#2563eb', queued: '#16a34a', late: '#dc2626', checkout: '#f59e0b', ready: 'var(--theme-primary)', complete: 'var(--theme-primary)', noshow: '#dc2626' };
 
         const statusTextColors = { waiting: '#fff', next: '#fff', queued: '#fff', late: '#fff', checkout: '#fff', ready: '#fff', complete: '#fff', noshow: '#fff' };
 
@@ -10295,7 +10307,7 @@ function renderAppointments() {
 
         block.classList.add(isPast ? 'appt-past' : (isCurrent ? 'appt-current' : 'appt-upcoming'));
 
-        const statusColorMap = { waiting: '#2563eb', next: '#2563eb', queued: '#16a34a', late: '#991b1b', checkout: '#f97316', ready: 'var(--theme-primary)', complete: 'var(--theme-primary)', noshow: '#dc2626' };
+        const statusColorMap = { waiting: '#2563eb', next: '#2563eb', queued: '#16a34a', late: '#991b1b', checkout: '#f59e0b', ready: 'var(--theme-primary)', complete: 'var(--theme-primary)', noshow: '#dc2626' };
 
         const rhColor = statusColorMap[appt.status] || '#999';
 
@@ -10560,7 +10572,7 @@ function showApptTooltip(e, appt, staffNames, totalPrice) {
 
     const phone = phoneRawTt ? ((typeof Utils !== 'undefined' && Utils.formatPhone) ? Utils.formatPhone(phoneRawTt) : phoneRawTt) : '';
 
-    const statusColors = { waiting: '#2563eb', next: '#2563eb', queued: '#16a34a', late: '#991b1b', checkout: '#f97316', ready: 'var(--theme-primary)', complete: 'var(--theme-primary)', noshow: '#dc2626' };
+    const statusColors = { waiting: '#2563eb', next: '#2563eb', queued: '#16a34a', late: '#991b1b', checkout: '#f59e0b', ready: 'var(--theme-primary)', complete: 'var(--theme-primary)', noshow: '#dc2626' };
 
     const statusColor = statusColors[appt.status] || '#6b7280';
 
@@ -12362,7 +12374,7 @@ function renderAllAppointments() {
 
         const statusLabels = { waiting: 'QUEUED', queued: 'CHECKED-IN', late: 'NOT CHECKED IN', checkout: 'PROCESSING', complete: 'FINALIZED', noshow: 'NO SHOWS' };
 
-        const statusColors = { waiting: '#2563eb', queued: '#16a34a', late: '#991b1b', checkout: '#f97316', complete: 'var(--theme-primary)', noshow: '#dc2626' };
+        const statusColors = { waiting: '#2563eb', queued: '#16a34a', late: '#991b1b', checkout: '#f59e0b', complete: 'var(--theme-primary)', noshow: '#dc2626' };
 
         const label = statusLabels[currentApptFilter] || currentApptFilter.toUpperCase();
 
@@ -12378,7 +12390,7 @@ function renderAllAppointments() {
 
         const groupLabels = { complete: 'FINALIZED', checkout: 'PROCESSING', queued: 'CHECKED-IN', waiting: 'QUEUED', late: 'NOT CHECKED IN', noshow: 'NO SHOWS' };
 
-        const groupColors = { complete: 'var(--theme-primary)', checkout: '#f97316', queued: '#16a34a', waiting: '#2563eb', late: '#991b1b', noshow: '#dc2626' };
+        const groupColors = { complete: 'var(--theme-primary)', checkout: '#f59e0b', queued: '#16a34a', waiting: '#2563eb', late: '#991b1b', noshow: '#dc2626' };
 
         groupOrder.forEach(key => {
 
@@ -12410,7 +12422,7 @@ function renderApptCard(a) {
 
     const timeStr = formatTime12(a.time);
 
-    const statusColorMap = { waiting: '#2563eb', queued: '#16a34a', late: '#991b1b', checkout: '#f97316', complete: 'var(--theme-primary)', ready: 'var(--theme-primary)', noshow: '#dc2626' };
+    const statusColorMap = { waiting: '#2563eb', queued: '#16a34a', late: '#991b1b', checkout: '#f59e0b', complete: 'var(--theme-primary)', ready: 'var(--theme-primary)', noshow: '#dc2626' };
 
     const borderColor = statusColorMap[a.status] || '#f97316';
 
@@ -15218,6 +15230,14 @@ function toggleNotifDropdown() {
     if (dd) dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
 }
 
+function toggleCalendarLegend() {
+    const legend = document.getElementById('calendarLegend');
+    const toggle = legend ? legend.querySelector('.calendar-legend-toggle') : null;
+    if (!legend || !toggle) return;
+    const open = legend.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+}
+
 document.addEventListener('click', function(event) {
     const dropdown = document.getElementById('notifDropdown');
     const trigger = event.target.closest && event.target.closest('#notificationBell');
@@ -15226,6 +15246,12 @@ document.addEventListener('click', function(event) {
     }
     if (event.target.classList && event.target.classList.contains('modal-overlay')) {
         event.target.classList.remove('active');
+    }
+    const legend = document.getElementById('calendarLegend');
+    if (legend && !event.target.closest('#calendarLegend')) {
+        legend.classList.remove('open');
+        const legendToggle = legend.querySelector('.calendar-legend-toggle');
+        if (legendToggle) legendToggle.setAttribute('aria-expanded', 'false');
     }
 });
 
