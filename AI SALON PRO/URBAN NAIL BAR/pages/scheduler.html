@@ -1821,6 +1821,47 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 
 .year-month .count { font-size: 0.7rem; color: #d1d5db; }
 
+.week-header,
+.month-day-header {
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.week-time {
+    color: #111827;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.week-cell {
+    color: #374151;
+    font-size: 0.72rem;
+}
+
+.week-cell .week-count,
+.month-day .day-count,
+.year-month .count {
+    color: #111827;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.month-day .day-count {
+    position: static;
+    display: block;
+    margin-top: 8px;
+}
+
+.year-month .count {
+    color: #111827;
+    background: #f3f4f6;
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin-top: 6px;
+}
+
 
 
 .week-grid { display: grid; grid-template-columns: 60px repeat(7, 1fr); gap: 1px; background: #e5e7eb; border: 1px solid #333; }
@@ -2796,9 +2837,9 @@ body.is-appt-dragging .appt-block * {
 
                 <div class="stat-box stat-total" onclick="openAllAppointmentsModal('walkins')" style="flex:1 1 0; min-width:0; padding:3px 4px; border-color:var(--theme-primary);"><div class="label-top">Walk-ins</div><div class="number" id="statWalkins" style="color:#fff;">0</div></div>
 
-                <div class="stat-box stat-waiting" onclick="openAllAppointmentsModal('waiting')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">Waitlist</div><div class="number" id="statWaitlist" style="color:#fff;">0</div></div>
-
                 <div class="stat-box stat-complete" onclick="openAllAppointmentsModal('complete')" style="flex:1 1 0; min-width:0; padding:3px 4px; border-color:var(--theme-primary);"><div class="label-top">Complete</div><div class="number" id="statCompleted" style="color:var(--theme-primary);">0</div></div>
+
+                <div class="stat-box stat-waiting" onclick="openAllAppointmentsModal('waiting')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">Waitlist</div><div class="number" id="statWaitlist" style="color:#fff;">0</div></div>
 
                 <div class="stat-box stat-late" onclick="openAllAppointmentsModal('noshow')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">No Show</div><div class="number" id="statNoshow" style="color:#fff;">0</div></div>
 
@@ -2965,19 +3006,15 @@ body.is-appt-dragging .appt-block * {
 
         <!-- Messages (next to bell) -->
 
+        <a class="booking-calendar-link" href="scheduler.html#calendar" data-app-nav="booking-cal" title="Open appointment list" aria-label="Open appointment list" onclick="if(window.AppNav&&AppNav.goBookingCalendar)return AppNav.goBookingCalendar(event); if(typeof setView==='function'){showSection('calendar'); setView('spreadsheet'); return false;}" style="padding:5px 8px; border:1px solid; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; flex-shrink:0; white-space:nowrap; text-decoration:none;">
+            <i class="fas fa-list-check"></i> APPOINTMENT LIST
+        </a>
+
         <button onclick="openModal('messagesModal')" title="Messages" style="background:#1a1a1a; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:5px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px; flex-shrink:0; white-space:nowrap;">
 
             <i class="fas fa-envelope"></i> MESSAGES <span id="headerMsgBadge" style="background:#dc2626; color:#fff; padding:1px 5px; border-radius:50%; font-size:0.6rem; display:none;">0</span>
 
         </button>
-
-        <!-- Booking calendar (next to Messages) — not DIRECTORY -->
-
-        <a class="booking-calendar-link" href="scheduler.html#calendar" data-app-nav="booking-cal" title="Booking calendar" aria-label="Open booking calendar" onclick="if(window.AppNav&&AppNav.goBookingCalendar)return AppNav.goBookingCalendar(event); if(typeof showSection==='function'){showSection('calendar');return false;}" style="padding:5px 8px; border:1px solid; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; flex-shrink:0; white-space:nowrap; text-decoration:none;">
-
-            <i class="fas fa-calendar-alt"></i> APPOINTMENTS
-
-        </a>
 
         <span style="display:none;">
 
@@ -3279,11 +3316,11 @@ body.is-appt-dragging .appt-block * {
 
                         <div class="cal-pill" onclick="openAllAppointmentsModal('queued')" style="display:flex; align-items:center; gap:4px; background:#16a34a; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span style="text-shadow:0 1px 3px rgba(0,0,0,0.85);">Arrived</span><span id="calStatQueued" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
-                        <div class="cal-pill" onclick="openAllAppointmentsModal('waiting')" style="display:flex; align-items:center; gap:4px; background:#2563eb; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span style="text-shadow:0 1px 3px rgba(0,0,0,0.85);">Up Next</span><span id="calStatUpNext" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
-
                         <div class="cal-pill" onclick="openAllAppointmentsModal('checkout')" style="display:flex; align-items:center; gap:4px; background:#f97316; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span style="text-shadow:0 1px 3px rgba(0,0,0,0.85);">Payment</span><span id="calStatCheckout" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
                         <div class="cal-pill" onclick="openAllAppointmentsModal('complete')" style="display:flex; align-items:center; gap:4px; background:#000; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:2px 8px; border-radius:10px; font-size:0.6rem; font-weight:800; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span>Finalized</span><span id="calStatComplete" style="background:var(--theme-primary); color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
+
+                        <div class="cal-pill" onclick="openAllAppointmentsModal('waiting')" style="display:flex; align-items:center; gap:4px; background:#2563eb; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span>Waitlist</span><span id="calStatWaitlist" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
                     </div>
 
@@ -11549,7 +11586,7 @@ function renderWeekView(container) {
 
             const count = store.appointments.filter(a => a.date === dateStr && a.time.startsWith(String(h).padStart(2,'0'))).length;
 
-            html += `<div class="week-cell ${rowIdx % 2 === 1 ? 'row-alt' : ''}">${count > 0 ? `<span style="color:var(--theme-primary); font-weight:700; font-size:0.7rem;">${count} appts</span>` : '<span style="color:#d1d5db; font-size:0.7rem;">-</span>'}</div>`;
+            html += `<div class="week-cell ${rowIdx % 2 === 1 ? 'row-alt' : ''}">${count > 0 ? `<span class="week-count">${count} appts</span>` : '<span class="week-count">0 appts</span>'}</div>`;
 
         }
 
@@ -11601,7 +11638,7 @@ function renderMonthView(container) {
 
         const isToday = dateStr === today;
 
-        html += `<div class="month-day ${isToday ? 'today' : ''}"><div class="day-num">${d}</div>${count > 0 ? `<div class="day-count">${count} appts</div>` : ''}</div>`;
+        html += `<div class="month-day ${isToday ? 'today' : ''}"><div class="day-num">${d}</div><div class="day-count">${count} appts</div></div>`;
 
     }
 
@@ -11835,7 +11872,7 @@ function updateStats() {
 
     const calQueued = document.getElementById('calStatQueued');
 
-    const calUpNext = document.getElementById('calStatUpNext');
+    const calWaitlist = document.getElementById('calStatWaitlist');
 
     const calCheckout = document.getElementById('calStatCheckout');
 
@@ -11847,7 +11884,7 @@ function updateStats() {
 
     if (calQueued) calQueued.textContent = appts.filter(a => a.status === 'queued').length;
 
-    if (calUpNext) calUpNext.textContent = appts.filter(a => a.status === 'waiting').length;
+    if (calWaitlist) calWaitlist.textContent = waitingCount;
 
     if (calCheckout) calCheckout.textContent = appts.filter(a => a.status === 'checkout').length;
 
