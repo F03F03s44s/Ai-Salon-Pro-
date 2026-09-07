@@ -724,7 +724,8 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 
     display: flex; align-items: flex-start; justify-content: center;
 
-    color: #ffffff; font-weight: 700;
+    color: #f8fafc; font-weight: 800; font-size: 0.78rem;
+    letter-spacing: 0.01em;
 
     background: #1f2937;
 
@@ -735,6 +736,9 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 }
 
 .time-slot.row-alt { background: #111827; }
+
+.time-slot > div { width: 100%; }
+.time-slot > div > span:first-child { line-height: 1; }
 
 /* Client count badge in time column  gold = booked, green = done, red = needs attention */
 
@@ -1459,6 +1463,23 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 .multi-row .appt-svc-chip .n { font-size: 0.75rem; font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .multi-row .appt-svc-chip .p { font-size: 0.7rem; font-weight: 800; color: var(--theme-primary); }
 .appt-service-select.sch-hidden-svc { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+#walkinServiceAssignments {
+    display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
+    padding: 10px; border: 1px solid #2f3742; border-radius: 10px; background: #10151d;
+}
+.walkin-assignment-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, 0.9fr) auto;
+    align-items: center; gap: 8px; padding: 7px 8px; border: 1px solid #2a3441;
+    border-radius: 8px; background: #171e28;
+}
+.walkin-assignment-name { min-width: 0; color: #f8fafc; font-size: 0.75rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.walkin-assignment-meta { color: #9ca3af; font-size: 0.65rem; font-weight: 700; }
+.walkin-assignment-request { color: var(--theme-primary); cursor: pointer; font-size: 0.8rem; }
+@media (max-width: 620px) {
+    .walkin-assignment-row { grid-template-columns: minmax(0, 1fr) auto; }
+    .walkin-assignment-row select { grid-column: 1 / -1; width: 100%; }
+}
 
 /* ===== STAFF CARDS ===== */
 
@@ -4263,11 +4284,10 @@ body.is-appt-dragging .appt-block * {
                 <div class="sch-qb-pills" id="schApptServiceCats"></div>
                 <div class="sch-qb-services" id="schApptServiceMenu"></div>
             </div>
-            <div class="sch-qb-selected-label">Selected for booking (staff per line)</div>
+            <div class="sch-qb-selected-label">Select services above, then assign a technician to each service</div>
             <div id="apptServiceRows">
                 <!-- Dynamic selected service rows -->
             </div>
-            <button class="btn btn-success" style="margin-bottom:12px; font-size:0.75rem;" onclick="addApptServiceRow()"><i class="fas fa-plus"></i> Add Another Service Line</button>
 
 
 
@@ -4549,13 +4569,15 @@ body.is-appt-dragging .appt-block * {
 
 
 
-            <label class="form-label">Select Service</label>
+            <label class="form-label">Services & Technicians</label>
 
             <div id="walkinServiceGrid" style="max-height:200px; overflow-y:auto;"></div>
 
+            <div class="sch-qb-selected-label" style="margin-top:10px;">Assign a technician to each selected service</div>
+            <div id="walkinServiceAssignments"></div>
 
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;">
+            <div style="display:none;">
 
                 <div class="form-group">
 
@@ -6465,6 +6487,8 @@ let notifActiveTab = 'client';
 let apptServiceRowCount = 0;
 
 let selectedWalkinServices = new Set();
+let walkinServiceAssignments = new Map();
+let walkinServiceRequests = new Set();
 
 
 
@@ -7742,6 +7766,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         populateSelects();
 
         populateServiceGrid();
+        renderWalkinServiceAssignments();
 
         populateTimeSelects();
 
@@ -8312,7 +8337,7 @@ function initCalendar() {
 
         // Hierarchy: hours biggest, 30min medium, 15/45min smallest - ALL bold
 
-        const fontSize = isHour ? '0.9rem' : isHalf ? '0.8rem' : '0.68rem';
+        const fontSize = (isHour || isHalf) ? '0.78rem' : '0.62rem';
 
         const fontWeight = '800';
 
@@ -16391,11 +16416,52 @@ function toggleWalkinService(id) {
     if (selectedWalkinServices.has(nid) || selectedWalkinServices.has(id)) {
         selectedWalkinServices.delete(nid);
         selectedWalkinServices.delete(id);
+        walkinServiceAssignments.delete(nid);
+        walkinServiceRequests.delete(nid);
     } else {
         selectedWalkinServices.add(nid);
+        const fallbackStaff = document.getElementById('walkinStaff');
+        walkinServiceAssignments.set(nid, fallbackStaff && fallbackStaff.value ? Number(fallbackStaff.value) : 0);
     }
     updateWalkinSubtotal();
+    renderWalkinServiceAssignments();
     if (typeof populateServiceGrid === 'function') populateServiceGrid();
+}
+
+function renderWalkinServiceAssignments() {
+    const container = document.getElementById('walkinServiceAssignments');
+    if (!container) return;
+    const menu = typeof getSchedulerMenuServices === 'function' ? getSchedulerMenuServices() : (store.services || []);
+    const staff = typeof bookableStoreStaff === 'function' ? bookableStoreStaff() : (store.staff || []);
+    const staffOptions = '<option value="0">Open / Unassigned</option>' +
+        staff.map(s => '<option value="' + s.id + '">' + schQbEscAttr(s.name) + '</option>').join('');
+    const services = Array.from(selectedWalkinServices)
+        .map(id => menu.find(s => Number(s.id) === Number(id)))
+        .filter(Boolean);
+    if (!services.length) {
+        container.innerHTML = '<div style="color:#6b7280;font-size:0.7rem;text-align:center;padding:12px 6px;">Choose one or more services above to assign staff.</div>';
+        return;
+    }
+    container.innerHTML = services.map(s => {
+        const id = Number(s.id);
+        const assigned = walkinServiceAssignments.has(id) ? walkinServiceAssignments.get(id) : 0;
+        const requested = walkinServiceRequests.has(id) ? ' checked' : '';
+        return '<div class="walkin-assignment-row">' +
+            '<div><div class="walkin-assignment-name">' + schQbEscAttr(s.name) + '</div><div class="walkin-assignment-meta">' + formatServicePriceLabel(s) + ' · ' + (s.duration || 30) + ' min</div></div>' +
+            '<select class="form-select" aria-label="Technician for ' + schQbEscAttr(s.name) + '" onchange="updateWalkinServiceAssignment(' + id + ', this.value)">' +
+            staffOptions.replace('value="' + assigned + '"', 'value="' + assigned + '" selected') + '</select>' +
+            '<label class="walkin-assignment-request" title="Client requested this technician"><input type="checkbox" ' + requested + ' onchange="toggleWalkinServiceRequest(' + id + ', this.checked)"> <i class="fas fa-star"></i></label>' +
+            '</div>';
+    }).join('');
+}
+
+function updateWalkinServiceAssignment(serviceId, staffId) {
+    walkinServiceAssignments.set(Number(serviceId), normalizeBoardStaffId(staffId));
+}
+
+function toggleWalkinServiceRequest(serviceId, requested) {
+    if (requested) walkinServiceRequests.add(Number(serviceId));
+    else walkinServiceRequests.delete(Number(serviceId));
 }
 
 // ===== Shared booking-style service browse menu (appt + checkout) =====
@@ -19331,27 +19397,34 @@ function saveWalkin() {
     const name = document.getElementById('walkinName').value.trim() || 'Walk-In';
     const phone = document.getElementById('walkinPhone').value.trim();
     const _walkinStaffRaw = document.getElementById('walkinStaff').value;
-    const staffId = (_walkinStaffRaw === '' || _walkinStaffRaw == null) ? UNASSIGNED_STAFF_ID : normalizeBoardStaffId(_walkinStaffRaw);
     const time = document.getElementById('walkinTime').value;
     if (!time) { showToast('Please select a time', 'error'); return; }
     const services = [];
     const menu = typeof getSchedulerMenuServices === 'function' ? getSchedulerMenuServices() : (store.services || []);
     (typeof selectedWalkinServices !== 'undefined' ? selectedWalkinServices : new Set()).forEach(id => {
         const svc = menu.find(s => s.id === id || Number(s.id) === Number(id));
-        if (svc) services.push(Object.assign({}, svc));
+        if (svc) {
+            const assigned = walkinServiceAssignments.has(Number(id))
+                ? walkinServiceAssignments.get(Number(id))
+                : ((_walkinStaffRaw === '' || _walkinStaffRaw == null) ? UNASSIGNED_STAFF_ID : normalizeBoardStaffId(_walkinStaffRaw));
+            services.push(Object.assign({}, svc, { staffId: assigned }));
+        }
     });
     if (!services.length) { showToast('Please select at least one service', 'error'); return; }
     const total = services.reduce((sum, s) => sum + s.price, 0);
     const duration = Math.max(services.reduce((sum, s) => sum + s.duration, 0), 30);
     const walkinRequest = (document.getElementById('walkinRequest') || {}).value || '';
-    const walkinStaffRequest = !!(document.getElementById('walkinStaffRequest') || {}).checked;
+    const walkinStaffRequest = !!(document.getElementById('walkinStaffRequest') || {}).checked || walkinServiceRequests.size > 0;
+    const assignedStaffIds = [...new Set(services.map(s => normalizeBoardStaffId(s.staffId)))];
+    const staffId = assignedStaffIds.find(id => !isUnassignedStaffId(id)) ?? UNASSIGNED_STAFF_ID;
     const partySizeEl = document.getElementById('walkinPartySize');
     const partySize = Math.min(6, Math.max(1, parseInt(partySizeEl && partySizeEl.value, 10) || 1));
     const useLinked = partySize > 1;
     const partyId = useLinked ? ('party_' + Date.now().toString(36)) : null;
     const date = (typeof boardDateStr === 'function' ? boardDateStr(new Date()) : new Date().toISOString().split('T')[0]);
     store.walkins = store.walkins || [];
-    store.walkins.push({ id: Date.now(), name, phone: phone || 'N/A', staffId, staffIds: ((typeof isUnassignedStaffId === 'function' && isUnassignedStaffId(staffId)) ? [] : [staffId]), services, time, subtotal: total, duration, status: 'late', request: walkinRequest, staffRequest: walkinStaffRequest, partySize });
+    const walkinStaffIds = assignedStaffIds.filter(id => !(typeof isUnassignedStaffId === 'function' && isUnassignedStaffId(id)));
+    store.walkins.push({ id: Date.now(), name, phone: phone || 'N/A', staffId, staffIds: walkinStaffIds, services, time, subtotal: total, duration, status: 'late', request: walkinRequest, staffRequest: walkinStaffRequest, staffRequests: [...walkinServiceRequests], partySize });
     const staffNextStart = {}; const baseMin = timeToMinutes(time); const baseId = Date.now() + 1;
     const partyPayload = [];
     const guestBundles = [];
@@ -19379,12 +19452,14 @@ function saveWalkin() {
         if (useLinked && staffNextStart[bundle.staffId] != null) startMin = staffNextStart[bundle.staffId];
         const guestTime = minutesToTime(startMin);
         if (useLinked) staffNextStart[bundle.staffId] = startMin + bundle.duration;
-        const gBoardIds = ((typeof isUnassignedStaffId === 'function' && isUnassignedStaffId(bundle.staffId)) ? [] : [bundle.staffId]);
+        const gBoardIds = useLinked
+            ? ((typeof isUnassignedStaffId === 'function' && isUnassignedStaffId(bundle.staffId)) ? [] : [bundle.staffId])
+            : walkinStaffIds.slice();
         store.appointments.push({
             id: baseId + pi, clientId: null, clientName: partyPayload[pi].name, staffId: bundle.staffId, staffIds: gBoardIds.slice(),
             date, time: guestTime, duration: bundle.duration, price: bundle.price,
             services: bundle.services.map(s => Object.assign({}, s)), status: 'late',
-            request: walkinRequest, checkedIn: false, staffRequest: walkinStaffRequest,
+            request: walkinRequest, checkedIn: false, staffRequest: walkinStaffRequest, staffRequests: [...walkinServiceRequests],
             partySize, party: partyPayload, partyId: partyId || undefined, partyIndex: useLinked ? pi : undefined,
             guestNames: partyPayload.slice(1).map(p => p.name)
         });
@@ -19396,9 +19471,12 @@ function saveWalkin() {
     document.getElementById('walkinName').value = '';
     document.getElementById('walkinPhone').value = '';
     if (typeof selectedWalkinServices !== 'undefined') selectedWalkinServices.clear();
+    walkinServiceAssignments.clear();
+    walkinServiceRequests.clear();
     document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
     if (partySizeEl) partySizeEl.value = '1';
     if (typeof updateWalkinSubtotal === 'function') updateWalkinSubtotal();
+    if (typeof renderWalkinServiceAssignments === 'function') renderWalkinServiceAssignments();
 }
 
 function autoCheckLateAndNoShow() {
