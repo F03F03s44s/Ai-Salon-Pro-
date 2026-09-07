@@ -556,6 +556,17 @@ const DataManager = {
         this.saveData();
         this.saveSettings();
     },
+
+    // Staff changes need a durable checkpoint before another tab or device can
+    // observe them. Keep the normal debounced server push, but checkpoint and
+    // flush these access-control changes immediately.
+    saveCriticalChange(label) {
+        const saved = this.saveData();
+        if (!saved) return false;
+        this.createBackupSnapshot(label);
+        this.flushPushToServer();
+        return true;
+    },
     
     // Deep merge helper
     mergeDeep(target, source) {
@@ -600,7 +611,7 @@ const DataManager = {
             roles: packed.roles
         };
         this.data.staff.push(staff);
-        this.saveData();
+        this.saveCriticalChange('staff-added');
         return staff;
     },
     
@@ -614,7 +625,7 @@ const DataManager = {
                 next.roles = packed.roles;
             }
             this.data.staff[idx] = next;
-            this.saveData();
+            this.saveCriticalChange('staff-updated');
             return this.data.staff[idx];
         }
         return null;
@@ -643,7 +654,7 @@ const DataManager = {
             });
             this.data.staff = this.data.staff.filter(s => s.id !== id);
             this.logAudit('staff_deleted', `Staff "${staff.name}" (ID ${id}) deleted by ${deletedBy}. Record archived.`);
-            this.saveData();
+            this.saveCriticalChange('staff-deleted');
             return true;
         }
         return false;

@@ -4262,7 +4262,7 @@ body.is-appt-dragging .appt-block * {
 
                 </select>
 
-                <div style="font-size:0.65rem;color:#fbbf24;margin-top:6px;font-weight:600;">Party of N → N separate calendar blocks (P1–PN), not one fat block. “Add Another Service” adds services for each person — it does not add people.</div>
+                <div style="font-size:0.65rem;color:#fbbf24;margin-top:6px;font-weight:600;">Each client gets a separate calendar block. Add services for the selected client; add another client from the client tabs.</div>
 
                 <button type="button" class="btn btn-secondary" style="margin-top:8px;font-size:0.75rem;width:100%;" onclick="addApptPartyPerson()"><i class="fas fa-user-plus"></i> Add Person To Party</button>
 
@@ -6567,7 +6567,10 @@ function syncFromDM() {
 
 
         // --- Staff: pull shared staff in (match by name) ---
-
+        // Remove deleted shared staff before merging current records. Without
+        // this sweep a Scheduler tab could resurrect a deleted member locally.
+        const sharedStaffIds = new Set(dmStaff.map(dm => dm.id));
+        store.staff = store.staff.filter(s => !s.dmStaffId || sharedStaffIds.has(s.dmStaffId));
         dmStaff.forEach(dm => {
 
             const packed = (typeof Utils !== 'undefined' && Utils.packRoles)
@@ -6824,7 +6827,7 @@ function syncFromDM() {
 
                 clientName: (function() {
                     const prefix = (a.source === 'online' || a.source === 'online-account') ? '[Online] ' : '';
-                    // Keep per-seat guest names for linked/fat party members (do not overwrite with booker's name)
+                    // Keep per-client names for linked bookings (do not overwrite with the primary client's name)
                     if (a.partyId && a.clientName) return prefix + String(a.clientName).replace(/^\[Online\]\s*/i, '');
                     if (a.partyIndex != null && Number(a.partyIndex) > 0 && a.clientName) return prefix + String(a.clientName).replace(/^\[Online\]\s*/i, '');
                     if (client) return prefix + (`${client.firstName || ''} ${client.lastName || ''}`).trim();
@@ -7083,7 +7086,8 @@ function syncToDM() {
     if (!dmReady()) return;
 
     // Prevent addAppointment→saveData→listener→syncFromDM from cloning board rows
-    // before appt.dmId is assigned (party of N was becoming 2N blocks).
+    // before appt.dmId is assigned (linked bookings were becoming duplicate
+    // calendar blocks).
     if (window._unbPushingToDM) return;
     window._unbPushingToDM = true;
 
@@ -7905,6 +7909,16 @@ function confirmDeleteStaff() {
     const s = store.staff.find(st => st.id === staffId);
 
     if (!s) { closeDeleteStaffConfirmModal(); return; }
+
+    // The shared record is canonical so every page, tab, and device observes
+    // the deletion and retains the archived history.
+    if (s.dmStaffId && dmReady() && typeof DataManager.deleteStaff === 'function') {
+        const deleted = DataManager.deleteStaff(s.dmStaffId, 'scheduler');
+        if (!deleted) {
+            showToast('The shared staff record could not be deleted.', 'error');
+            return;
+        }
+    }
 
     // Archive the staff with all their data + deletion timestamp
 
@@ -9654,7 +9668,7 @@ function findClientForAppt(appt) {
 
 
 
-function partyBookerBaseFromAppt(appt) {
+function partyPrimaryClientBaseFromAppt(appt) {
     if (!appt) return 'Client';
     const stripSeat = (n) => String(n || '').trim()
         .replace(/\s*#\d+\s*$/, '')
@@ -9670,9 +9684,9 @@ function partyBookerBaseFromAppt(appt) {
         if (n && !(typeof Utils !== 'undefined' && Utils.isGenericPartyGuestName && Utils.isGenericPartyGuestName(n))) return n;
     }
     if (appt.partyId && Array.isArray(store.appointments)) {
-        const booker = store.appointments.find(a => a && a.partyId === appt.partyId && Number(a.partyIndex) === 0);
-        if (booker && booker.clientName) {
-            const n = firstWord(String(booker.clientName).replace(/^\?+\s*/, ''));
+        const primaryClient = store.appointments.find(a => a && a.partyId === appt.partyId && Number(a.partyIndex) === 0);
+        if (primaryClient && primaryClient.clientName) {
+            const n = firstWord(String(primaryClient.clientName).replace(/^\?+\s*/, ''));
             if (n && !(typeof Utils !== 'undefined' && Utils.isGenericPartyGuestName && Utils.isGenericPartyGuestName(n))) return n;
         }
     }
@@ -9690,7 +9704,7 @@ function getApptDisplayName(appt) {
 
     let raw = (appt && appt.clientName) ? String(appt.clientName).replace(/^\?+\s*/, '').trim() : '';
 
-    // Party seats: rewrite "Guest 2" / "Name (P2)" → "Sean #2" for calendar blocks
+    // Client seats: normalize legacy guest labels for calendar blocks
     if (appt && raw && typeof Utils !== 'undefined' && Utils.resolvePartySeatName) {
         const needsRewrite = Utils.isGenericPartyGuestName(raw) || /\s\(P\d+\)$/i.test(raw);
         if (needsRewrite) {
@@ -9703,7 +9717,7 @@ function getApptDisplayName(appt) {
                 else if (pm) seatIdx = Math.max(0, Number(pm[1]) - 1);
                 else seatIdx = 1;
             }
-            raw = Utils.resolvePartySeatName(partyBookerBaseFromAppt(appt), seatIdx, raw);
+            raw = Utils.resolvePartySeatName(partyPrimaryClientBaseFromAppt(appt), seatIdx, raw);
         }
     }
 
@@ -10129,7 +10143,7 @@ function renderAppointments() {
 
         let clientNameShort = displayName;
 
-        // With P1/P2 badge, show base name only (avoid "Sean #2" + P2)
+            // With a client badge, show the base name only (avoid duplicate seat labels)
 
         if (clientNameShort && typeof Utils !== 'undefined' && Utils.partyBaseDisplayName && Utils.partyBadgeHtml && Utils.partyBadgeHtml(appt)) {
 
@@ -16599,7 +16613,7 @@ function schApptRenderSeatTabs() {
     tabs.style.display = 'flex';
     tabs.innerHTML = Array.from({ length: n }, (_, i) => {
         const nameInp = i === 0 ? null : document.getElementById('apptGuestName_' + (i + 1));
-        const label = i === 0 ? 'P1 (booker)' : ('P' + (i + 1) + (nameInp && nameInp.value.trim() ? (': ' + nameInp.value.trim()) : ''));
+            const label = 'C' + (i + 1) + (nameInp && nameInp.value.trim() ? (': ' + nameInp.value.trim()) : '');
         return '<button type="button" class="sch-qb-seat-tab' + (schApptMenu.activeSeat === i ? ' selected' : '') +
             '" onclick="schApptPickSeat(' + i + ')">' + label + '</button>';
     }).join('');
@@ -18944,7 +18958,7 @@ function toggleApptPartyGuestFields() {
         return;
     }
     const baseHint = getApptPartyBaseName();
-    let html = '<div style="font-size:0.65rem;color:#9ca3af;margin-bottom:6px;">Seat names — pick each person\'s service below (P1–P' + size + '). Empty seats auto-fill as ' + baseHint + ' #2, #3… Each gets their own calendar block &amp; price.</div>';
+    let html = '<div style="font-size:0.65rem;color:#9ca3af;margin-bottom:6px;">Client names - pick each client\'s service below (C1-C' + size + '). Empty names use the primary client name. Each gets a separate calendar block and price.</div>';
     for (let g = 2; g <= size; g++) {
         const ph = (typeof Utils !== 'undefined' && Utils.partySeatName) ? Utils.partySeatName(baseHint, g - 1) : (baseHint + ' #' + g);
         html += '<div class="form-group" style="margin-bottom:6px;"><label class="form-label">Client ' + g + ' name</label>' +
