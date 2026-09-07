@@ -1862,6 +1862,69 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
     margin-top: 6px;
 }
 
+.calendar-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px 10px;
+    background: #111827;
+    border-top: 1px solid #374151;
+    border-bottom: 1px solid #374151;
+}
+
+.calendar-legend-panel {
+    min-width: 0;
+    padding: 7px 9px;
+    background: #1f2937;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+}
+
+.calendar-legend-title {
+    margin-bottom: 6px;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.calendar-legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+    gap: 4px 10px;
+}
+
+.calendar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: #f3f4f6;
+    font-size: 0.64rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.calendar-legend-item i {
+    width: 14px;
+    color: #fbbf24;
+    text-align: center;
+    flex: 0 0 14px;
+}
+
+.calendar-legend-swatch {
+    width: 12px;
+    height: 12px;
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 3px;
+    flex: 0 0 12px;
+}
+
+@media (max-width: 900px) {
+    .calendar-legend { grid-template-columns: 1fr; }
+}
+
 
 
 .week-grid { display: grid; grid-template-columns: 60px repeat(7, 1fr); gap: 1px; background: #e5e7eb; border: 1px solid #333; }
@@ -3338,6 +3401,57 @@ body.is-appt-dragging .appt-block * {
 
                     </div>
 
+                </div>
+
+                <div class="calendar-legend" aria-label="Calendar color and icon descriptions">
+                    <div class="calendar-legend-panel">
+                        <div class="calendar-legend-title"><i class="fas fa-palette" aria-hidden="true"></i> Colors</div>
+                        <div class="calendar-legend-grid">
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#fbbf24;"></span>Salon Appointment</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#8b5cf6;"></span>Online Booking</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#16a34a;"></span>Appointment Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#64748b;"></span>Ticket Note</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#3b82f6;"></span>Walk-in Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#2563eb;"></span>Waiting Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#f97316;"></span>Servicing Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#ea580c;"></span>In Servicing Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#eab308;"></span>Pending Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#22c55e;"></span>Done Service Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#a855f7;"></span>Request Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#ec4899;"></span>Special Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#06b6d4;"></span>Group Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#14b8a6;"></span>Combine Tickets</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#84cc16;"></span>Payment Attached</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#f59e0b;"></span>Reminder</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#10b981;"></span>Confirm</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#ef4444;"></span>Canceled</div>
+                            <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#991b1b;"></span>No Show</div>
+                        </div>
+                    </div>
+                    <div class="calendar-legend-panel">
+                        <div class="calendar-legend-title"><i class="fas fa-icons" aria-hidden="true"></i> Icons</div>
+                        <div class="calendar-legend-grid">
+                            <div class="calendar-legend-item"><i class="fas fa-calendar-check"></i>Salon Appointment</div>
+                            <div class="calendar-legend-item"><i class="fas fa-globe"></i>Online Booking</div>
+                            <div class="calendar-legend-item"><i class="fas fa-ticket-alt"></i>Appointment Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-sticky-note"></i>Ticket Note</div>
+                            <div class="calendar-legend-item"><i class="fas fa-walking"></i>Walk-in Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-hourglass-half"></i>Waiting Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-concierge-bell"></i>Servicing Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-spinner"></i>In Servicing Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-hourglass-start"></i>Pending Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-check-double"></i>Done Service Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-hand-paper"></i>Request Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-star"></i>Special Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-users"></i>Group Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-link"></i>Combine Tickets</div>
+                            <div class="calendar-legend-item"><i class="fas fa-money-check-alt"></i>Payment Attached</div>
+                            <div class="calendar-legend-item"><i class="fas fa-bell"></i>Reminder</div>
+                            <div class="calendar-legend-item"><i class="fas fa-check-circle"></i>Confirm</div>
+                            <div class="calendar-legend-item"><i class="fas fa-ban"></i>Canceled</div>
+                            <div class="calendar-legend-item"><i class="fas fa-user-slash"></i>No Show</div>
+                        </div>
+                    </div>
                 </div>
 
 
