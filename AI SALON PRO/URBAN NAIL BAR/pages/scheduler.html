@@ -638,6 +638,26 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 
 .cal-nav-btn:hover { background: #4b5563; }
 
+.booking-calendar-link {
+    background: var(--theme-primary);
+    color: #111827;
+    border-color: #fff;
+    box-shadow: 0 2px 8px rgba(251,191,36,0.35);
+}
+
+.booking-calendar-link i {
+    color: #111827;
+    font-size: 1rem;
+}
+
+.booking-calendar-link:hover,
+.booking-calendar-link:focus-visible {
+    background: #fff;
+    color: #111827;
+    outline: 2px solid var(--theme-primary);
+    outline-offset: 2px;
+}
+
 .cal-title { font-size: 0.9rem; font-weight: 700; color: var(--theme-primary); }
 
 .view-tabs { display: flex; gap: 2px; }
@@ -2953,7 +2973,7 @@ body.is-appt-dragging .appt-block * {
 
         <!-- Booking calendar (next to Messages) — not DIRECTORY -->
 
-        <a href="scheduler.html#calendar" data-app-nav="booking-cal" title="Booking calendar" onclick="if(window.AppNav&&AppNav.goBookingCalendar)return AppNav.goBookingCalendar(event); if(typeof showSection==='function'){showSection('calendar');return false;}" style="background:#1a1a1a; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:5px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px; flex-shrink:0; white-space:nowrap; text-decoration:none;">
+        <a class="booking-calendar-link" href="scheduler.html#calendar" data-app-nav="booking-cal" title="Booking calendar" aria-label="Open booking calendar" onclick="if(window.AppNav&&AppNav.goBookingCalendar)return AppNav.goBookingCalendar(event); if(typeof showSection==='function'){showSection('calendar');return false;}" style="padding:5px 8px; border:1px solid; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; flex-shrink:0; white-space:nowrap; text-decoration:none;">
 
             <i class="fas fa-calendar-alt"></i> BOOKING
 
@@ -4262,7 +4282,6 @@ body.is-appt-dragging .appt-block * {
 
                 </select>
 
-                <div style="font-size:0.65rem;color:#fbbf24;margin-top:6px;font-weight:600;">Each client gets a separate calendar block. Add services for the selected client; add another client from the client tabs.</div>
 
                 <button type="button" class="btn btn-secondary" style="margin-top:8px;font-size:0.75rem;width:100%;" onclick="addApptPartyPerson()"><i class="fas fa-user-plus"></i> Add Person To Party</button>
 
@@ -18958,7 +18977,7 @@ function toggleApptPartyGuestFields() {
         return;
     }
     const baseHint = getApptPartyBaseName();
-    let html = '<div style="font-size:0.65rem;color:#9ca3af;margin-bottom:6px;">Client names - pick each client\'s service below (C1-C' + size + '). Empty names use the primary client name. Each gets a separate calendar block and price.</div>';
+    let html = '';
     for (let g = 2; g <= size; g++) {
         const ph = (typeof Utils !== 'undefined' && Utils.partySeatName) ? Utils.partySeatName(baseHint, g - 1) : (baseHint + ' #' + g);
         html += '<div class="form-group" style="margin-bottom:6px;"><label class="form-label">Client ' + g + ' name</label>' +
