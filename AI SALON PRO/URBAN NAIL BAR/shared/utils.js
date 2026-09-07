@@ -161,7 +161,7 @@ const Utils = {
         return s;
     },
 
-    /** Booker keeps base name; seats 2+ → "Sean #2", "Sean #3" (not "Guest 2"). index0Based: 0 = booker. */
+    /** Build a stable display name for each client in a multi-client booking. */
     partySeatName(baseName, index0Based) {
         const base = this.partyBaseDisplayName(baseName) || String(baseName || '').trim() || 'Client';
         const idx = Number(index0Based);
@@ -173,7 +173,7 @@ const Utils = {
         return !String(name || '').trim() || /^Guest\s*\d+$/i.test(String(name).trim());
     },
 
-    /** Prefer typed name; rewrite blank / "Guest N" / "Name (P2)" to booker-based seat labels. */
+    /** Prefer typed names while accepting legacy saved "(P2)" labels. */
     resolvePartySeatName(baseName, index0Based, explicitName) {
         const explicit = String(explicitName || '').trim();
         const pn = explicit.match(/^(.+?)\s*\(P(\d+)\)$/i);
@@ -202,12 +202,12 @@ const Utils = {
         if (total <= 1) return '';
         // High-contrast chip: white on black (readable on dark appointment blocks)
         const chip = 'display:inline-block;vertical-align:middle;margin-left:4px;padding:2px 6px;border-radius:4px;background:#000;color:#fff;font-size:0.65rem;font-weight:800;line-height:1.35;letter-spacing:0.03em;white-space:nowrap;text-transform:none;border:1px solid #fff;box-shadow:none;';
-        // Linked multi-appointment parties: show P1 / P2 / P3 by seat when known
+        // Linked multi-appointment parties: show C1 / C2 / C3 by seat when known
         if (appt && appt.partyId) {
             const idx = (appt.partyIndex != null && !Number.isNaN(Number(appt.partyIndex)))
                 ? (Number(appt.partyIndex) + 1)
                 : total;
-            return ` <span class="party-badge party-linked" title="Party of ${total} · Client ${idx}" style="${chip}">P${idx}</span>`;
+            return ` <span class="party-badge party-linked" title="Client ${idx} of ${total}" style="${chip}">C${idx}</span>`;
         }
         const n = total - 1;
         return ` <span class="party-badge" title="Party of ${total}" style="${chip}">+${n}</span>`;

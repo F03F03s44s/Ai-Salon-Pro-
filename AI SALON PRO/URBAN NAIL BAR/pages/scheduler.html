@@ -638,6 +638,26 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 
 .cal-nav-btn:hover { background: #4b5563; }
 
+.booking-calendar-link {
+    background: var(--theme-primary);
+    color: #111827;
+    border-color: #fff;
+    box-shadow: 0 2px 8px rgba(251,191,36,0.35);
+}
+
+.booking-calendar-link i {
+    color: #111827;
+    font-size: 1rem;
+}
+
+.booking-calendar-link:hover,
+.booking-calendar-link:focus-visible {
+    background: #fff;
+    color: #111827;
+    outline: 2px solid var(--theme-primary);
+    outline-offset: 2px;
+}
+
 .cal-title { font-size: 0.9rem; font-weight: 700; color: var(--theme-primary); }
 
 .view-tabs { display: flex; gap: 2px; }
@@ -724,7 +744,8 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 
     display: flex; align-items: flex-start; justify-content: center;
 
-    color: #ffffff; font-weight: 700;
+    color: #f8fafc; font-weight: 800; font-size: 0.78rem;
+    letter-spacing: 0.01em;
 
     background: #1f2937;
 
@@ -735,6 +756,9 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 }
 
 .time-slot.row-alt { background: #111827; }
+
+.time-slot > div { width: 100%; }
+.time-slot > div > span:first-child { line-height: 1; }
 
 /* Client count badge in time column  gold = booked, green = done, red = needs attention */
 
@@ -1460,6 +1484,23 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 .multi-row .appt-svc-chip .p { font-size: 0.7rem; font-weight: 800; color: var(--theme-primary); }
 .appt-service-select.sch-hidden-svc { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
+#walkinServiceAssignments {
+    display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
+    padding: 10px; border: 1px solid #2f3742; border-radius: 10px; background: #10151d;
+}
+.walkin-assignment-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, 0.9fr) auto;
+    align-items: center; gap: 8px; padding: 7px 8px; border: 1px solid #2a3441;
+    border-radius: 8px; background: #171e28;
+}
+.walkin-assignment-name { min-width: 0; color: #f8fafc; font-size: 0.75rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.walkin-assignment-meta { color: #9ca3af; font-size: 0.65rem; font-weight: 700; }
+.walkin-assignment-request { color: var(--theme-primary); cursor: pointer; font-size: 0.8rem; }
+@media (max-width: 620px) {
+    .walkin-assignment-row { grid-template-columns: minmax(0, 1fr) auto; }
+    .walkin-assignment-row select { grid-column: 1 / -1; width: 100%; }
+}
+
 /* ===== STAFF CARDS ===== */
 
 .staff-card-dark {
@@ -1779,6 +1820,47 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 .year-month h4 { font-size: 0.85rem; font-weight: 700; color: #1f2937; margin-bottom: 4px; }
 
 .year-month .count { font-size: 0.7rem; color: #d1d5db; }
+
+.week-header,
+.month-day-header {
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.week-time {
+    color: #111827;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.week-cell {
+    color: #374151;
+    font-size: 0.72rem;
+}
+
+.week-cell .week-count,
+.month-day .day-count,
+.year-month .count {
+    color: #111827;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.month-day .day-count {
+    position: static;
+    display: block;
+    margin-top: 8px;
+}
+
+.year-month .count {
+    color: #111827;
+    background: #f3f4f6;
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin-top: 6px;
+}
 
 
 
@@ -2755,12 +2837,11 @@ body.is-appt-dragging .appt-block * {
 
                 <div class="stat-box stat-total" onclick="openAllAppointmentsModal('walkins')" style="flex:1 1 0; min-width:0; padding:3px 4px; border-color:var(--theme-primary);"><div class="label-top">Walk-ins</div><div class="number" id="statWalkins" style="color:#fff;">0</div></div>
 
-                <div class="stat-box stat-waiting" onclick="openAllAppointmentsModal('waiting')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">Waitlist</div><div class="number" id="statWaitlist" style="color:#fff;">0</div></div>
-
                 <div class="stat-box stat-complete" onclick="openAllAppointmentsModal('complete')" style="flex:1 1 0; min-width:0; padding:3px 4px; border-color:var(--theme-primary);"><div class="label-top">Complete</div><div class="number" id="statCompleted" style="color:var(--theme-primary);">0</div></div>
 
-                <div class="stat-box stat-late" onclick="openAllAppointmentsModal('noshow')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">No Show</div><div class="number" id="statNoshow" style="color:#fff;">0</div></div>
+                <div class="stat-box stat-waiting" onclick="openAllAppointmentsModal('waiting')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">Waitlist</div><div class="number" id="statWaitlist" style="color:#fff;">0</div></div>
 
+                <div class="stat-box stat-late" onclick="openAllAppointmentsModal('noshow')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">No Show</div><div class="number" id="statNoshow" style="color:#fff;">0</div></div>
 
 
             </div>
@@ -2889,7 +2970,7 @@ body.is-appt-dragging .appt-block * {
 
         <div style="position:relative; flex-shrink:0;">
 
-            <button onclick="toggleNotifDropdown()" title="Notifications" style="background:#1a1a1a; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:5px 8px; border-radius:6px; font-size:0.85rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+            <button id="notificationBell" onclick="toggleNotifDropdown()" title="Notifications" style="background:#1a1a1a; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:5px 8px; border-radius:6px; font-size:0.85rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
 
                 <i class="fas fa-bell"></i> <span id="notifBadge" style="background:#dc2626; color:#fff; padding:1px 5px; border-radius:50%; font-size:0.6rem; display:none;">0</span>
 
@@ -2925,19 +3006,15 @@ body.is-appt-dragging .appt-block * {
 
         <!-- Messages (next to bell) -->
 
+        <a class="booking-calendar-link" href="scheduler.html#calendar" data-app-nav="booking-cal" title="Open appointment list" aria-label="Open appointment list" onclick="if(window.AppNav&&AppNav.goBookingCalendar)return AppNav.goBookingCalendar(event); if(typeof setView==='function'){showSection('calendar'); setView('spreadsheet'); return false;}" style="padding:5px 8px; border:1px solid; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; flex-shrink:0; white-space:nowrap; text-decoration:none;">
+            <i class="fas fa-list-check"></i> APPOINTMENT LIST
+        </a>
+
         <button onclick="openModal('messagesModal')" title="Messages" style="background:#1a1a1a; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:5px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px; flex-shrink:0; white-space:nowrap;">
 
             <i class="fas fa-envelope"></i> MESSAGES <span id="headerMsgBadge" style="background:#dc2626; color:#fff; padding:1px 5px; border-radius:50%; font-size:0.6rem; display:none;">0</span>
 
         </button>
-
-        <!-- Booking calendar (next to Messages) — not DIRECTORY -->
-
-        <a href="scheduler.html#calendar" data-app-nav="booking-cal" title="Booking calendar" onclick="if(window.AppNav&&AppNav.goBookingCalendar)return AppNav.goBookingCalendar(event); if(typeof showSection==='function'){showSection('calendar');return false;}" style="background:#1a1a1a; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:5px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px; flex-shrink:0; white-space:nowrap; text-decoration:none;">
-
-            <i class="fas fa-calendar-alt"></i> BOOKING
-
-        </a>
 
         <span style="display:none;">
 
@@ -3239,17 +3316,17 @@ body.is-appt-dragging .appt-block * {
 
                         <div class="cal-pill" onclick="openAllAppointmentsModal('queued')" style="display:flex; align-items:center; gap:4px; background:#16a34a; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span style="text-shadow:0 1px 3px rgba(0,0,0,0.85);">Arrived</span><span id="calStatQueued" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
-                        <div class="cal-pill" onclick="openAllAppointmentsModal('waiting')" style="display:flex; align-items:center; gap:4px; background:#2563eb; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span style="text-shadow:0 1px 3px rgba(0,0,0,0.85);">Up Next</span><span id="calStatUpNext" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
-
                         <div class="cal-pill" onclick="openAllAppointmentsModal('checkout')" style="display:flex; align-items:center; gap:4px; background:#f97316; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span style="text-shadow:0 1px 3px rgba(0,0,0,0.85);">Payment</span><span id="calStatCheckout" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
                         <div class="cal-pill" onclick="openAllAppointmentsModal('complete')" style="display:flex; align-items:center; gap:4px; background:#000; border:1px solid var(--theme-primary); color:var(--theme-primary); padding:2px 8px; border-radius:10px; font-size:0.6rem; font-weight:800; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span>Finalized</span><span id="calStatComplete" style="background:var(--theme-primary); color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
+
+                        <div class="cal-pill" onclick="openAllAppointmentsModal('waiting')" style="display:flex; align-items:center; gap:4px; background:#2563eb; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.65rem; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;"><span>Waitlist</span><span id="calStatWaitlist" style="background:#fff; color:#000; padding:1px 6px; border-radius:6px; font-size:0.7rem; font-weight:900;">0</span></div>
 
                     </div>
 
                     <div class="view-tabs">
 
-                        <button class="view-tab" onclick="setView('spreadsheet')"><i class="fas fa-table"></i> Spreadsheet</button>
+                        <button class="view-tab" onclick="setView('spreadsheet')"><i class="fas fa-list-check"></i> Appointment List</button>
 
                         <button class="view-tab active" onclick="setView('day')">Day</button>
 
@@ -4198,21 +4275,15 @@ body.is-appt-dragging .appt-block * {
 
             <div class="form-group search-container">
 
-                <label class="form-label">Search Client</label>
+                <label class="form-label">Client</label>
 
-                <input type="text" class="form-input" id="apptClientSearch" placeholder="Name, phone, email, or last 4 digits..." oninput="searchApptClients()" autocomplete="off">
+                <input type="text" class="form-input" id="apptClientSearch" placeholder="Search by name, phone, email, or last 4 digits..." oninput="searchApptClients()" autocomplete="off">
 
                 <div class="search-results" id="apptClientResults"></div>
 
             </div>
 
-            <div class="form-group">
-
-                <label class="form-label">Selected Client</label>
-
-                <input type="text" class="form-input" id="apptSelectedClient" readonly placeholder="No client selected">
-
-            </div>
+            <input type="hidden" id="apptSelectedClient" value="">
 
             <div style="display:flex; gap:8px; margin-bottom:8px;">
 
@@ -4242,7 +4313,6 @@ body.is-appt-dragging .appt-block * {
 
                 </select>
 
-                <div style="font-size:0.65rem;color:#fbbf24;margin-top:6px;font-weight:600;">Party of N → N separate calendar blocks (P1–PN), not one fat block. “Add Another Service” adds services for each person — it does not add people.</div>
 
                 <button type="button" class="btn btn-secondary" style="margin-top:8px;font-size:0.75rem;width:100%;" onclick="addApptPartyPerson()"><i class="fas fa-user-plus"></i> Add Person To Party</button>
 
@@ -4264,11 +4334,10 @@ body.is-appt-dragging .appt-block * {
                 <div class="sch-qb-pills" id="schApptServiceCats"></div>
                 <div class="sch-qb-services" id="schApptServiceMenu"></div>
             </div>
-            <div class="sch-qb-selected-label">Selected for booking (staff per line)</div>
+            <div class="sch-qb-selected-label">Select services above, then assign a technician to each service</div>
             <div id="apptServiceRows">
                 <!-- Dynamic selected service rows -->
             </div>
-            <button class="btn btn-success" style="margin-bottom:12px; font-size:0.75rem;" onclick="addApptServiceRow()"><i class="fas fa-plus"></i> Add Another Service Line</button>
 
 
 
@@ -4550,13 +4619,15 @@ body.is-appt-dragging .appt-block * {
 
 
 
-            <label class="form-label">Select Service</label>
+            <label class="form-label">Services & Technicians</label>
 
             <div id="walkinServiceGrid" style="max-height:200px; overflow-y:auto;"></div>
 
+            <div class="sch-qb-selected-label" style="margin-top:10px;">Assign a technician to each selected service</div>
+            <div id="walkinServiceAssignments"></div>
 
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;">
+            <div style="display:none;">
 
                 <div class="form-group">
 
@@ -6465,7 +6536,9 @@ let notifActiveTab = 'client';
 
 let apptServiceRowCount = 0;
 
-let selectedWalkinServices = new Set();
+let selectedWalkinServices = [];
+let walkinServiceAssignments = new Map();
+let walkinServiceRequests = new Set();
 
 
 
@@ -6544,7 +6617,10 @@ function syncFromDM() {
 
 
         // --- Staff: pull shared staff in (match by name) ---
-
+        // Remove deleted shared staff before merging current records. Without
+        // this sweep a Scheduler tab could resurrect a deleted member locally.
+        const sharedStaffIds = new Set(dmStaff.map(dm => dm.id));
+        store.staff = store.staff.filter(s => !s.dmStaffId || sharedStaffIds.has(s.dmStaffId));
         dmStaff.forEach(dm => {
 
             const packed = (typeof Utils !== 'undefined' && Utils.packRoles)
@@ -6801,7 +6877,7 @@ function syncFromDM() {
 
                 clientName: (function() {
                     const prefix = (a.source === 'online' || a.source === 'online-account') ? '[Online] ' : '';
-                    // Keep per-seat guest names for linked/fat party members (do not overwrite with booker's name)
+                    // Keep per-client names for linked bookings (do not overwrite with the primary client's name)
                     if (a.partyId && a.clientName) return prefix + String(a.clientName).replace(/^\[Online\]\s*/i, '');
                     if (a.partyIndex != null && Number(a.partyIndex) > 0 && a.clientName) return prefix + String(a.clientName).replace(/^\[Online\]\s*/i, '');
                     if (client) return prefix + (`${client.firstName || ''} ${client.lastName || ''}`).trim();
@@ -7060,7 +7136,8 @@ function syncToDM() {
     if (!dmReady()) return;
 
     // Prevent addAppointment→saveData→listener→syncFromDM from cloning board rows
-    // before appt.dmId is assigned (party of N was becoming 2N blocks).
+    // before appt.dmId is assigned (linked bookings were becoming duplicate
+    // calendar blocks).
     if (window._unbPushingToDM) return;
     window._unbPushingToDM = true;
 
@@ -7743,6 +7820,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         populateSelects();
 
         populateServiceGrid();
+        renderWalkinServiceAssignments();
 
         populateTimeSelects();
 
@@ -7881,6 +7959,16 @@ function confirmDeleteStaff() {
     const s = store.staff.find(st => st.id === staffId);
 
     if (!s) { closeDeleteStaffConfirmModal(); return; }
+
+    // The shared record is canonical so every page, tab, and device observes
+    // the deletion and retains the archived history.
+    if (s.dmStaffId && dmReady() && typeof DataManager.deleteStaff === 'function') {
+        const deleted = DataManager.deleteStaff(s.dmStaffId, 'scheduler');
+        if (!deleted) {
+            showToast('The shared staff record could not be deleted.', 'error');
+            return;
+        }
+    }
 
     // Archive the staff with all their data + deletion timestamp
 
@@ -8313,7 +8401,7 @@ function initCalendar() {
 
         // Hierarchy: hours biggest, 30min medium, 15/45min smallest - ALL bold
 
-        const fontSize = isHour ? '0.9rem' : isHalf ? '0.8rem' : '0.68rem';
+        const fontSize = (isHour || isHalf) ? '0.78rem' : '0.62rem';
 
         const fontWeight = '800';
 
@@ -9630,7 +9718,7 @@ function findClientForAppt(appt) {
 
 
 
-function partyBookerBaseFromAppt(appt) {
+function partyPrimaryClientBaseFromAppt(appt) {
     if (!appt) return 'Client';
     const stripSeat = (n) => String(n || '').trim()
         .replace(/\s*#\d+\s*$/, '')
@@ -9646,9 +9734,9 @@ function partyBookerBaseFromAppt(appt) {
         if (n && !(typeof Utils !== 'undefined' && Utils.isGenericPartyGuestName && Utils.isGenericPartyGuestName(n))) return n;
     }
     if (appt.partyId && Array.isArray(store.appointments)) {
-        const booker = store.appointments.find(a => a && a.partyId === appt.partyId && Number(a.partyIndex) === 0);
-        if (booker && booker.clientName) {
-            const n = firstWord(String(booker.clientName).replace(/^\?+\s*/, ''));
+        const primaryClient = store.appointments.find(a => a && a.partyId === appt.partyId && Number(a.partyIndex) === 0);
+        if (primaryClient && primaryClient.clientName) {
+            const n = firstWord(String(primaryClient.clientName).replace(/^\?+\s*/, ''));
             if (n && !(typeof Utils !== 'undefined' && Utils.isGenericPartyGuestName && Utils.isGenericPartyGuestName(n))) return n;
         }
     }
@@ -9666,7 +9754,7 @@ function getApptDisplayName(appt) {
 
     let raw = (appt && appt.clientName) ? String(appt.clientName).replace(/^\?+\s*/, '').trim() : '';
 
-    // Party seats: rewrite "Guest 2" / "Name (P2)" → "Sean #2" for calendar blocks
+    // Client seats: normalize legacy guest labels for calendar blocks
     if (appt && raw && typeof Utils !== 'undefined' && Utils.resolvePartySeatName) {
         const needsRewrite = Utils.isGenericPartyGuestName(raw) || /\s\(P\d+\)$/i.test(raw);
         if (needsRewrite) {
@@ -9679,7 +9767,7 @@ function getApptDisplayName(appt) {
                 else if (pm) seatIdx = Math.max(0, Number(pm[1]) - 1);
                 else seatIdx = 1;
             }
-            raw = Utils.resolvePartySeatName(partyBookerBaseFromAppt(appt), seatIdx, raw);
+            raw = Utils.resolvePartySeatName(partyPrimaryClientBaseFromAppt(appt), seatIdx, raw);
         }
     }
 
@@ -10105,7 +10193,7 @@ function renderAppointments() {
 
         let clientNameShort = displayName;
 
-        // With P1/P2 badge, show base name only (avoid "Sean #2" + P2)
+            // With a client badge, show the base name only (avoid duplicate seat labels)
 
         if (clientNameShort && typeof Utils !== 'undefined' && Utils.partyBaseDisplayName && Utils.partyBadgeHtml && Utils.partyBadgeHtml(appt)) {
 
@@ -11446,7 +11534,9 @@ function renderCalendarView() {
 
     updateCalendarTitle();
 
-    renderAppointments();
+    // Day view owns the time-grid renderer. Re-rendering appointments after a
+    // week/month/year render replaced those views with an empty day board.
+    if (store.currentView === 'day') renderAppointments();
 
 }
 
@@ -11496,7 +11586,7 @@ function renderWeekView(container) {
 
             const count = store.appointments.filter(a => a.date === dateStr && a.time.startsWith(String(h).padStart(2,'0'))).length;
 
-            html += `<div class="week-cell ${rowIdx % 2 === 1 ? 'row-alt' : ''}">${count > 0 ? `<span style="color:var(--theme-primary); font-weight:700; font-size:0.7rem;">${count} appts</span>` : '<span style="color:#d1d5db; font-size:0.7rem;">-</span>'}</div>`;
+            html += `<div class="week-cell ${rowIdx % 2 === 1 ? 'row-alt' : ''}">${count > 0 ? `<span class="week-count">${count} appts</span>` : '<span class="week-count">0 appts</span>'}</div>`;
 
         }
 
@@ -11548,7 +11638,7 @@ function renderMonthView(container) {
 
         const isToday = dateStr === today;
 
-        html += `<div class="month-day ${isToday ? 'today' : ''}"><div class="day-num">${d}</div>${count > 0 ? `<div class="day-count">${count} appts</div>` : ''}</div>`;
+        html += `<div class="month-day ${isToday ? 'today' : ''}"><div class="day-num">${d}</div><div class="day-count">${count} appts</div></div>`;
 
     }
 
@@ -11782,7 +11872,7 @@ function updateStats() {
 
     const calQueued = document.getElementById('calStatQueued');
 
-    const calUpNext = document.getElementById('calStatUpNext');
+    const calWaitlist = document.getElementById('calStatWaitlist');
 
     const calCheckout = document.getElementById('calStatCheckout');
 
@@ -11794,7 +11884,7 @@ function updateStats() {
 
     if (calQueued) calQueued.textContent = appts.filter(a => a.status === 'queued').length;
 
-    if (calUpNext) calUpNext.textContent = appts.filter(a => a.status === 'waiting').length;
+    if (calWaitlist) calWaitlist.textContent = waitingCount;
 
     if (calCheckout) calCheckout.textContent = appts.filter(a => a.status === 'checkout').length;
 
@@ -15014,6 +15104,17 @@ function toggleNotifDropdown() {
     if (dd) dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
 }
 
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('notifDropdown');
+    const trigger = event.target.closest && event.target.closest('#notificationBell');
+    if (dropdown && !trigger && !event.target.closest('#notifDropdown')) {
+        dropdown.style.display = 'none';
+    }
+    if (event.target.classList && event.target.classList.contains('modal-overlay')) {
+        event.target.classList.remove('active');
+    }
+});
+
 function toggleHeaderNotif(tab) {
     const clientTab = document.getElementById('headerClientNotifTab');
     const staffTab = document.getElementById('headerStaffNotifTab');
@@ -16355,7 +16456,7 @@ function populateServiceGrid() {
     const services = getSchedulerMenuServices();
     const cats = (typeof Utils !== 'undefined' && Utils.serviceCategories) ? Utils.serviceCategories(services) : [];
     if (!cats.includes(st.serviceCat)) st.serviceCat = cats[0] || 'Manicure';
-    const selected = typeof selectedWalkinServices !== 'undefined' ? selectedWalkinServices : new Set();
+    const selected = typeof selectedWalkinServices !== 'undefined' ? new Set(selectedWalkinServices) : new Set();
     const pills = cats.map(c =>
         '<button type="button" class="sch-qb-pill' + (st.serviceCat === c ? ' selected' : '') +
         '" data-cat="' + schApptEscAttr(c) + '" onclick="window._walkinMenu.serviceCat=this.getAttribute(\'data-cat\');populateServiceGrid()">' + c + '</button>'
@@ -16389,14 +16490,69 @@ function populateServiceGrid() {
 
 function toggleWalkinService(id) {
     const nid = Number(id);
-    if (selectedWalkinServices.has(nid) || selectedWalkinServices.has(id)) {
-        selectedWalkinServices.delete(nid);
-        selectedWalkinServices.delete(id);
-    } else {
-        selectedWalkinServices.add(nid);
-    }
+    const fallbackStaff = document.getElementById('walkinStaff');
+    selectedWalkinServices.push(nid);
+    walkinServiceAssignments.set(selectedWalkinServices.length - 1, fallbackStaff && fallbackStaff.value ? Number(fallbackStaff.value) : 0);
     updateWalkinSubtotal();
+    renderWalkinServiceAssignments();
     if (typeof populateServiceGrid === 'function') populateServiceGrid();
+}
+
+function renderWalkinServiceAssignments() {
+    const container = document.getElementById('walkinServiceAssignments');
+    if (!container) return;
+    const menu = typeof getSchedulerMenuServices === 'function' ? getSchedulerMenuServices() : (store.services || []);
+    const staff = typeof bookableStoreStaff === 'function' ? bookableStoreStaff() : (store.staff || []);
+    const staffOptions = '<option value="0">Open / Unassigned</option>' +
+        staff.map(s => '<option value="' + s.id + '">' + schQbEscAttr(s.name) + '</option>').join('');
+    const services = selectedWalkinServices
+        .map((id, index) => ({ svc: menu.find(s => Number(s.id) === Number(id)), index }))
+        .filter(entry => entry.svc)
+        .map(entry => ({ ...entry.svc, selectionIndex: entry.index }))
+        ;
+    if (!services.length) {
+        container.innerHTML = '<div style="color:#6b7280;font-size:0.7rem;text-align:center;padding:12px 6px;">Choose one or more services above to assign staff.</div>';
+        return;
+    }
+    container.innerHTML = services.map(s => {
+        const assigned = walkinServiceAssignments.has(s.selectionIndex) ? walkinServiceAssignments.get(s.selectionIndex) : 0;
+        const requested = walkinServiceRequests.has(s.selectionIndex) ? ' checked' : '';
+        return '<div class="walkin-assignment-row">' +
+            '<div><div class="walkin-assignment-name">' + schQbEscAttr(s.name) + '</div><div class="walkin-assignment-meta">' + formatServicePriceLabel(s) + ' · ' + (s.duration || 30) + ' min</div></div>' +
+            '<select class="form-select" aria-label="Technician for ' + schQbEscAttr(s.name) + '" onchange="updateWalkinServiceAssignment(' + s.selectionIndex + ', this.value)">' +
+            staffOptions.replace('value="' + assigned + '"', 'value="' + assigned + '" selected') + '</select>' +
+            '<label class="walkin-assignment-request" title="Client requested this technician"><input type="checkbox" ' + requested + ' onchange="toggleWalkinServiceRequest(' + s.selectionIndex + ', this.checked)"> <i class="fas fa-star"></i></label>' +
+            '<button type="button" class="remove-btn" title="Remove this service" onclick="removeWalkinService(' + s.selectionIndex + ')"><i class="fas fa-minus"></i></button>' +
+            '</div>';
+    }).join('');
+}
+
+function removeWalkinService(index) {
+    selectedWalkinServices.splice(index, 1);
+    const assignments = new Map();
+    const requests = new Set();
+    walkinServiceAssignments.forEach((staffId, key) => {
+        if (key < index) assignments.set(key, staffId);
+        if (key > index) assignments.set(key - 1, staffId);
+    });
+    walkinServiceRequests.forEach(key => {
+        if (key < index) requests.add(key);
+        if (key > index) requests.add(key - 1);
+    });
+    walkinServiceAssignments = assignments;
+    walkinServiceRequests = requests;
+    updateWalkinSubtotal();
+    renderWalkinServiceAssignments();
+    populateServiceGrid();
+}
+
+function updateWalkinServiceAssignment(index, staffId) {
+    walkinServiceAssignments.set(Number(index), normalizeBoardStaffId(staffId));
+}
+
+function toggleWalkinServiceRequest(index, requested) {
+    if (requested) walkinServiceRequests.add(Number(index));
+    else walkinServiceRequests.delete(Number(index));
 }
 
 // ===== Shared booking-style service browse menu (appt + checkout) =====
@@ -16520,7 +16676,7 @@ function schApptRenderSeatTabs() {
     tabs.style.display = 'flex';
     tabs.innerHTML = Array.from({ length: n }, (_, i) => {
         const nameInp = i === 0 ? null : document.getElementById('apptGuestName_' + (i + 1));
-        const label = i === 0 ? 'P1 (booker)' : ('P' + (i + 1) + (nameInp && nameInp.value.trim() ? (': ' + nameInp.value.trim()) : ''));
+            const label = 'C' + (i + 1) + (nameInp && nameInp.value.trim() ? (': ' + nameInp.value.trim()) : '');
         return '<button type="button" class="sch-qb-seat-tab' + (schApptMenu.activeSeat === i ? ' selected' : '') +
             '" onclick="schApptPickSeat(' + i + ')">' + label + '</button>';
     }).join('');
@@ -16741,14 +16897,7 @@ function schApptPickService(serviceId) {
         const row = document.querySelectorAll('#apptServiceRows .multi-row')[seat];
         if (row) setApptServiceRowService(row, svc);
     } else {
-        // Single client: toggle off if already selected as only match on a row; else add/fill empty
-        const existing = rows.find(r => String(r.dataset.serviceId || '') === String(svc.id));
-        if (existing) {
-            existing.remove();
-            updateApptSubtotal();
-            renderSchApptServiceMenu();
-            return;
-        }
+        // Single client: every click adds a service row, including duplicate services.
         const empty = rows.find(r => !r.dataset.serviceId);
         if (empty) setApptServiceRowService(empty, svc);
         else {
@@ -16961,7 +17110,13 @@ function selectClientInModal(clientId) {
 }
 
 function searchApptClients() {
-    const term = document.getElementById('apptClientSearch').value.toLowerCase();
+    const input = document.getElementById('apptClientSearch');
+    const selected = document.getElementById('apptSelectedClient');
+    if (selected && selected.value && input.value.trim() !== selected.value.trim()) {
+        selected.value = '';
+        selected.dataset.clientId = '';
+    }
+    const term = input.value.toLowerCase().trim();
     const results = document.getElementById('apptClientResults');
     if (term.length < 1) { results.classList.remove('active'); return; }
     const matches = store.clients.filter(c => c.firstName.toLowerCase().includes(term) || c.lastName.toLowerCase().includes(term) || c.phone.includes(term) || c.email.toLowerCase().includes(term) || c.phone.slice(-4).includes(term));
@@ -16972,9 +17127,10 @@ function searchApptClients() {
 function selectApptClient(id) {
     const client = store.clients.find(c => c.id === id);
     if (client) {
-        document.getElementById('apptSelectedClient').value = `${client.firstName} ${client.lastName}`;
+        const name = `${client.firstName} ${client.lastName}`;
+        document.getElementById('apptSelectedClient').value = name;
         document.getElementById('apptSelectedClient').dataset.clientId = id;
-        document.getElementById('apptClientSearch').value = '';
+        document.getElementById('apptClientSearch').value = name;
         document.getElementById('apptClientResults').classList.remove('active');
         if (typeof toggleApptPartyGuestFields === 'function') toggleApptPartyGuestFields();
     }
@@ -17084,7 +17240,7 @@ function saveAppointment() {
         status: 'late', request, checkedIn: false, staffRequests
     });
 
-    renderAppointments();
+    if (store.currentView === 'day') renderAppointments();
     updateStats();
     closeModal('newAppointmentModal');
     showToast('Appointment booked');
@@ -17133,7 +17289,7 @@ function saveWalkin() {
 
     document.getElementById('walkinName').value = '';
     document.getElementById('walkinPhone').value = '';
-    selectedWalkinServices.clear();
+    selectedWalkinServices.length = 0;
     document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
     updateWalkinSubtotal();
 }
@@ -17954,12 +18110,19 @@ function finalizeCloseout() {
 function printCloseout() { showToast('Printing report...'); }
 
 function showSection(section) {
+    closeTransientOverlays();
     document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
     document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
     const target = document.getElementById(section + 'Section');
     if (target) { 
         target.style.display = 'flex'; 
         target.style.flexDirection = 'column';
+    }
+
+    function closeTransientOverlays() {
+        document.querySelectorAll('.modal-overlay.active').forEach(modal => modal.classList.remove('active'));
+        const dropdown = document.getElementById('notifDropdown');
+        if (dropdown) dropdown.style.display = 'none';
     }
     // Find the sidebar button that corresponds to this section and activate it
     const sidebarBtn = document.querySelector(`.sidebar-btn[data-section="${section}"]`);
@@ -18088,6 +18251,17 @@ function sendMessageReply() {
 }
 
 function openModal(id) {
+    document.querySelectorAll('.modal-overlay.active').forEach(activeModal => {
+        if (activeModal.id !== id && (
+            activeModal.id === 'messagesModal' ||
+            activeModal.id === 'posTicketDetailModal' ||
+            activeModal.id === 'notifPopupModal'
+        )) {
+            activeModal.classList.remove('active');
+        }
+    });
+    const notificationDropdown = document.getElementById('notifDropdown');
+    if (notificationDropdown && id !== 'messagesModal') notificationDropdown.style.display = 'none';
     const modal = document.getElementById(id);
     if (modal) modal.classList.add('active');
     if (id === 'closeoutModal') renderCloseout();
@@ -18872,7 +19046,7 @@ function toggleApptPartyGuestFields() {
         return;
     }
     const baseHint = getApptPartyBaseName();
-    let html = '<div style="font-size:0.65rem;color:#9ca3af;margin-bottom:6px;">Seat names — pick each person\'s service below (P1–P' + size + '). Empty seats auto-fill as ' + baseHint + ' #2, #3… Each gets their own calendar block &amp; price.</div>';
+    let html = '';
     for (let g = 2; g <= size; g++) {
         const ph = (typeof Utils !== 'undefined' && Utils.partySeatName) ? Utils.partySeatName(baseHint, g - 1) : (baseHint + ' #' + g);
         html += '<div class="form-group" style="margin-bottom:6px;"><label class="form-label">Client ' + g + ' name</label>' +
@@ -19332,27 +19506,35 @@ function saveWalkin() {
     const name = document.getElementById('walkinName').value.trim() || 'Walk-In';
     const phone = document.getElementById('walkinPhone').value.trim();
     const _walkinStaffRaw = document.getElementById('walkinStaff').value;
-    const staffId = (_walkinStaffRaw === '' || _walkinStaffRaw == null) ? UNASSIGNED_STAFF_ID : normalizeBoardStaffId(_walkinStaffRaw);
     const time = document.getElementById('walkinTime').value;
     if (!time) { showToast('Please select a time', 'error'); return; }
     const services = [];
     const menu = typeof getSchedulerMenuServices === 'function' ? getSchedulerMenuServices() : (store.services || []);
     (typeof selectedWalkinServices !== 'undefined' ? selectedWalkinServices : new Set()).forEach(id => {
         const svc = menu.find(s => s.id === id || Number(s.id) === Number(id));
-        if (svc) services.push(Object.assign({}, svc));
+        if (svc) {
+            const selectionIndex = services.length;
+            const assigned = walkinServiceAssignments.has(selectionIndex)
+                ? walkinServiceAssignments.get(selectionIndex)
+                : ((_walkinStaffRaw === '' || _walkinStaffRaw == null) ? UNASSIGNED_STAFF_ID : normalizeBoardStaffId(_walkinStaffRaw));
+            services.push(Object.assign({}, svc, { staffId: assigned }));
+        }
     });
     if (!services.length) { showToast('Please select at least one service', 'error'); return; }
     const total = services.reduce((sum, s) => sum + s.price, 0);
     const duration = Math.max(services.reduce((sum, s) => sum + s.duration, 0), 30);
     const walkinRequest = (document.getElementById('walkinRequest') || {}).value || '';
-    const walkinStaffRequest = !!(document.getElementById('walkinStaffRequest') || {}).checked;
+    const walkinStaffRequest = !!(document.getElementById('walkinStaffRequest') || {}).checked || walkinServiceRequests.size > 0;
+    const assignedStaffIds = [...new Set(services.map(s => normalizeBoardStaffId(s.staffId)))];
+    const staffId = assignedStaffIds.find(id => !isUnassignedStaffId(id)) ?? UNASSIGNED_STAFF_ID;
     const partySizeEl = document.getElementById('walkinPartySize');
     const partySize = Math.min(6, Math.max(1, parseInt(partySizeEl && partySizeEl.value, 10) || 1));
     const useLinked = partySize > 1;
     const partyId = useLinked ? ('party_' + Date.now().toString(36)) : null;
     const date = (typeof boardDateStr === 'function' ? boardDateStr(new Date()) : new Date().toISOString().split('T')[0]);
     store.walkins = store.walkins || [];
-    store.walkins.push({ id: Date.now(), name, phone: phone || 'N/A', staffId, staffIds: ((typeof isUnassignedStaffId === 'function' && isUnassignedStaffId(staffId)) ? [] : [staffId]), services, time, subtotal: total, duration, status: 'late', request: walkinRequest, staffRequest: walkinStaffRequest, partySize });
+    const walkinStaffIds = assignedStaffIds.filter(id => !(typeof isUnassignedStaffId === 'function' && isUnassignedStaffId(id)));
+    store.walkins.push({ id: Date.now(), name, phone: phone || 'N/A', staffId, staffIds: walkinStaffIds, services, time, subtotal: total, duration, status: 'late', request: walkinRequest, staffRequest: walkinStaffRequest, staffRequests: [...walkinServiceRequests], partySize });
     const staffNextStart = {}; const baseMin = timeToMinutes(time); const baseId = Date.now() + 1;
     const partyPayload = [];
     const guestBundles = [];
@@ -19380,12 +19562,14 @@ function saveWalkin() {
         if (useLinked && staffNextStart[bundle.staffId] != null) startMin = staffNextStart[bundle.staffId];
         const guestTime = minutesToTime(startMin);
         if (useLinked) staffNextStart[bundle.staffId] = startMin + bundle.duration;
-        const gBoardIds = ((typeof isUnassignedStaffId === 'function' && isUnassignedStaffId(bundle.staffId)) ? [] : [bundle.staffId]);
+        const gBoardIds = useLinked
+            ? ((typeof isUnassignedStaffId === 'function' && isUnassignedStaffId(bundle.staffId)) ? [] : [bundle.staffId])
+            : walkinStaffIds.slice();
         store.appointments.push({
             id: baseId + pi, clientId: null, clientName: partyPayload[pi].name, staffId: bundle.staffId, staffIds: gBoardIds.slice(),
             date, time: guestTime, duration: bundle.duration, price: bundle.price,
             services: bundle.services.map(s => Object.assign({}, s)), status: 'late',
-            request: walkinRequest, checkedIn: false, staffRequest: walkinStaffRequest,
+            request: walkinRequest, checkedIn: false, staffRequest: walkinStaffRequest, staffRequests: [...walkinServiceRequests],
             partySize, party: partyPayload, partyId: partyId || undefined, partyIndex: useLinked ? pi : undefined,
             guestNames: partyPayload.slice(1).map(p => p.name)
         });
@@ -19396,10 +19580,13 @@ function saveWalkin() {
     showToast(useLinked ? ('Walk-in party of ' + partySize + ' — ' + partySize + ' blocks') : 'Walk-in added');
     document.getElementById('walkinName').value = '';
     document.getElementById('walkinPhone').value = '';
-    if (typeof selectedWalkinServices !== 'undefined') selectedWalkinServices.clear();
+    if (typeof selectedWalkinServices !== 'undefined') selectedWalkinServices.length = 0;
+    walkinServiceAssignments.clear();
+    walkinServiceRequests.clear();
     document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
     if (partySizeEl) partySizeEl.value = '1';
     if (typeof updateWalkinSubtotal === 'function') updateWalkinSubtotal();
+    if (typeof renderWalkinServiceAssignments === 'function') renderWalkinServiceAssignments();
 }
 
 function autoCheckLateAndNoShow() {
@@ -20045,4 +20232,3 @@ function saveModalStaff() {
 })();
 </script>
 </html>
-
