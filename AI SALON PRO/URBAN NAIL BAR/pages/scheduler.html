@@ -4262,7 +4262,7 @@ body.is-appt-dragging .appt-block * {
 
                 </select>
 
-                <div style="font-size:0.65rem;color:#fbbf24;margin-top:6px;font-weight:600;">Party of N → N separate calendar blocks (P1–PN), not one fat block. “Add Another Service” adds services for each person — it does not add people.</div>
+                <div style="font-size:0.65rem;color:#fbbf24;margin-top:6px;font-weight:600;">Each client gets a separate calendar block. Add services for the selected client; add another client from the client tabs.</div>
 
                 <button type="button" class="btn btn-secondary" style="margin-top:8px;font-size:0.75rem;width:100%;" onclick="addApptPartyPerson()"><i class="fas fa-user-plus"></i> Add Person To Party</button>
 
@@ -6486,7 +6486,7 @@ let notifActiveTab = 'client';
 
 let apptServiceRowCount = 0;
 
-let selectedWalkinServices = new Set();
+let selectedWalkinServices = [];
 let walkinServiceAssignments = new Map();
 let walkinServiceRequests = new Set();
 
@@ -6567,7 +6567,10 @@ function syncFromDM() {
 
 
         // --- Staff: pull shared staff in (match by name) ---
-
+        // Remove deleted shared staff before merging current records. Without
+        // this sweep a Scheduler tab could resurrect a deleted member locally.
+        const sharedStaffIds = new Set(dmStaff.map(dm => dm.id));
+        store.staff = store.staff.filter(s => !s.dmStaffId || sharedStaffIds.has(s.dmStaffId));
         dmStaff.forEach(dm => {
 
             const packed = (typeof Utils !== 'undefined' && Utils.packRoles)
@@ -6824,7 +6827,7 @@ function syncFromDM() {
 
                 clientName: (function() {
                     const prefix = (a.source === 'online' || a.source === 'online-account') ? '[Online] ' : '';
-                    // Keep per-seat guest names for linked/fat party members (do not overwrite with booker's name)
+                    // Keep per-client names for linked bookings (do not overwrite with the primary client's name)
                     if (a.partyId && a.clientName) return prefix + String(a.clientName).replace(/^\[Online\]\s*/i, '');
                     if (a.partyIndex != null && Number(a.partyIndex) > 0 && a.clientName) return prefix + String(a.clientName).replace(/^\[Online\]\s*/i, '');
                     if (client) return prefix + (`${client.firstName || ''} ${client.lastName || ''}`).trim();
@@ -7083,7 +7086,8 @@ function syncToDM() {
     if (!dmReady()) return;
 
     // Prevent addAppointment→saveData→listener→syncFromDM from cloning board rows
-    // before appt.dmId is assigned (party of N was becoming 2N blocks).
+    // before appt.dmId is assigned (linked bookings were becoming duplicate
+    // calendar blocks).
     if (window._unbPushingToDM) return;
     window._unbPushingToDM = true;
 
@@ -7905,6 +7909,16 @@ function confirmDeleteStaff() {
     const s = store.staff.find(st => st.id === staffId);
 
     if (!s) { closeDeleteStaffConfirmModal(); return; }
+
+    // The shared record is canonical so every page, tab, and device observes
+    // the deletion and retains the archived history.
+    if (s.dmStaffId && dmReady() && typeof DataManager.deleteStaff === 'function') {
+        const deleted = DataManager.deleteStaff(s.dmStaffId, 'scheduler');
+        if (!deleted) {
+            showToast('The shared staff record could not be deleted.', 'error');
+            return;
+        }
+    }
 
     // Archive the staff with all their data + deletion timestamp
 
@@ -9654,7 +9668,7 @@ function findClientForAppt(appt) {
 
 
 
-function partyBookerBaseFromAppt(appt) {
+function partyPrimaryClientBaseFromAppt(appt) {
     if (!appt) return 'Client';
     const stripSeat = (n) => String(n || '').trim()
         .replace(/\s*#\d+\s*$/, '')
@@ -9670,9 +9684,9 @@ function partyBookerBaseFromAppt(appt) {
         if (n && !(typeof Utils !== 'undefined' && Utils.isGenericPartyGuestName && Utils.isGenericPartyGuestName(n))) return n;
     }
     if (appt.partyId && Array.isArray(store.appointments)) {
-        const booker = store.appointments.find(a => a && a.partyId === appt.partyId && Number(a.partyIndex) === 0);
-        if (booker && booker.clientName) {
-            const n = firstWord(String(booker.clientName).replace(/^\?+\s*/, ''));
+        const primaryClient = store.appointments.find(a => a && a.partyId === appt.partyId && Number(a.partyIndex) === 0);
+        if (primaryClient && primaryClient.clientName) {
+            const n = firstWord(String(primaryClient.clientName).replace(/^\?+\s*/, ''));
             if (n && !(typeof Utils !== 'undefined' && Utils.isGenericPartyGuestName && Utils.isGenericPartyGuestName(n))) return n;
         }
     }
@@ -9690,7 +9704,7 @@ function getApptDisplayName(appt) {
 
     let raw = (appt && appt.clientName) ? String(appt.clientName).replace(/^\?+\s*/, '').trim() : '';
 
-    // Party seats: rewrite "Guest 2" / "Name (P2)" → "Sean #2" for calendar blocks
+    // Client seats: normalize legacy guest labels for calendar blocks
     if (appt && raw && typeof Utils !== 'undefined' && Utils.resolvePartySeatName) {
         const needsRewrite = Utils.isGenericPartyGuestName(raw) || /\s\(P\d+\)$/i.test(raw);
         if (needsRewrite) {
@@ -9703,7 +9717,7 @@ function getApptDisplayName(appt) {
                 else if (pm) seatIdx = Math.max(0, Number(pm[1]) - 1);
                 else seatIdx = 1;
             }
-            raw = Utils.resolvePartySeatName(partyBookerBaseFromAppt(appt), seatIdx, raw);
+            raw = Utils.resolvePartySeatName(partyPrimaryClientBaseFromAppt(appt), seatIdx, raw);
         }
     }
 
@@ -10129,7 +10143,7 @@ function renderAppointments() {
 
         let clientNameShort = displayName;
 
-        // With P1/P2 badge, show base name only (avoid "Sean #2" + P2)
+            // With a client badge, show the base name only (avoid duplicate seat labels)
 
         if (clientNameShort && typeof Utils !== 'undefined' && Utils.partyBaseDisplayName && Utils.partyBadgeHtml && Utils.partyBadgeHtml(appt)) {
 
@@ -16379,7 +16393,7 @@ function populateServiceGrid() {
     const services = getSchedulerMenuServices();
     const cats = (typeof Utils !== 'undefined' && Utils.serviceCategories) ? Utils.serviceCategories(services) : [];
     if (!cats.includes(st.serviceCat)) st.serviceCat = cats[0] || 'Manicure';
-    const selected = typeof selectedWalkinServices !== 'undefined' ? selectedWalkinServices : new Set();
+    const selected = typeof selectedWalkinServices !== 'undefined' ? new Set(selectedWalkinServices) : new Set();
     const pills = cats.map(c =>
         '<button type="button" class="sch-qb-pill' + (st.serviceCat === c ? ' selected' : '') +
         '" data-cat="' + schApptEscAttr(c) + '" onclick="window._walkinMenu.serviceCat=this.getAttribute(\'data-cat\');populateServiceGrid()">' + c + '</button>'
@@ -16413,16 +16427,9 @@ function populateServiceGrid() {
 
 function toggleWalkinService(id) {
     const nid = Number(id);
-    if (selectedWalkinServices.has(nid) || selectedWalkinServices.has(id)) {
-        selectedWalkinServices.delete(nid);
-        selectedWalkinServices.delete(id);
-        walkinServiceAssignments.delete(nid);
-        walkinServiceRequests.delete(nid);
-    } else {
-        selectedWalkinServices.add(nid);
-        const fallbackStaff = document.getElementById('walkinStaff');
-        walkinServiceAssignments.set(nid, fallbackStaff && fallbackStaff.value ? Number(fallbackStaff.value) : 0);
-    }
+    const fallbackStaff = document.getElementById('walkinStaff');
+    selectedWalkinServices.push(nid);
+    walkinServiceAssignments.set(selectedWalkinServices.length - 1, fallbackStaff && fallbackStaff.value ? Number(fallbackStaff.value) : 0);
     updateWalkinSubtotal();
     renderWalkinServiceAssignments();
     if (typeof populateServiceGrid === 'function') populateServiceGrid();
@@ -16435,33 +16442,54 @@ function renderWalkinServiceAssignments() {
     const staff = typeof bookableStoreStaff === 'function' ? bookableStoreStaff() : (store.staff || []);
     const staffOptions = '<option value="0">Open / Unassigned</option>' +
         staff.map(s => '<option value="' + s.id + '">' + schQbEscAttr(s.name) + '</option>').join('');
-    const services = Array.from(selectedWalkinServices)
-        .map(id => menu.find(s => Number(s.id) === Number(id)))
-        .filter(Boolean);
+    const services = selectedWalkinServices
+        .map((id, index) => ({ svc: menu.find(s => Number(s.id) === Number(id)), index }))
+        .filter(entry => entry.svc)
+        .map(entry => ({ ...entry.svc, selectionIndex: entry.index }))
+        ;
     if (!services.length) {
         container.innerHTML = '<div style="color:#6b7280;font-size:0.7rem;text-align:center;padding:12px 6px;">Choose one or more services above to assign staff.</div>';
         return;
     }
     container.innerHTML = services.map(s => {
-        const id = Number(s.id);
-        const assigned = walkinServiceAssignments.has(id) ? walkinServiceAssignments.get(id) : 0;
-        const requested = walkinServiceRequests.has(id) ? ' checked' : '';
+        const assigned = walkinServiceAssignments.has(s.selectionIndex) ? walkinServiceAssignments.get(s.selectionIndex) : 0;
+        const requested = walkinServiceRequests.has(s.selectionIndex) ? ' checked' : '';
         return '<div class="walkin-assignment-row">' +
             '<div><div class="walkin-assignment-name">' + schQbEscAttr(s.name) + '</div><div class="walkin-assignment-meta">' + formatServicePriceLabel(s) + ' · ' + (s.duration || 30) + ' min</div></div>' +
-            '<select class="form-select" aria-label="Technician for ' + schQbEscAttr(s.name) + '" onchange="updateWalkinServiceAssignment(' + id + ', this.value)">' +
+            '<select class="form-select" aria-label="Technician for ' + schQbEscAttr(s.name) + '" onchange="updateWalkinServiceAssignment(' + s.selectionIndex + ', this.value)">' +
             staffOptions.replace('value="' + assigned + '"', 'value="' + assigned + '" selected') + '</select>' +
-            '<label class="walkin-assignment-request" title="Client requested this technician"><input type="checkbox" ' + requested + ' onchange="toggleWalkinServiceRequest(' + id + ', this.checked)"> <i class="fas fa-star"></i></label>' +
+            '<label class="walkin-assignment-request" title="Client requested this technician"><input type="checkbox" ' + requested + ' onchange="toggleWalkinServiceRequest(' + s.selectionIndex + ', this.checked)"> <i class="fas fa-star"></i></label>' +
+            '<button type="button" class="remove-btn" title="Remove this service" onclick="removeWalkinService(' + s.selectionIndex + ')"><i class="fas fa-minus"></i></button>' +
             '</div>';
     }).join('');
 }
 
-function updateWalkinServiceAssignment(serviceId, staffId) {
-    walkinServiceAssignments.set(Number(serviceId), normalizeBoardStaffId(staffId));
+function removeWalkinService(index) {
+    selectedWalkinServices.splice(index, 1);
+    const assignments = new Map();
+    const requests = new Set();
+    walkinServiceAssignments.forEach((staffId, key) => {
+        if (key < index) assignments.set(key, staffId);
+        if (key > index) assignments.set(key - 1, staffId);
+    });
+    walkinServiceRequests.forEach(key => {
+        if (key < index) requests.add(key);
+        if (key > index) requests.add(key - 1);
+    });
+    walkinServiceAssignments = assignments;
+    walkinServiceRequests = requests;
+    updateWalkinSubtotal();
+    renderWalkinServiceAssignments();
+    populateServiceGrid();
 }
 
-function toggleWalkinServiceRequest(serviceId, requested) {
-    if (requested) walkinServiceRequests.add(Number(serviceId));
-    else walkinServiceRequests.delete(Number(serviceId));
+function updateWalkinServiceAssignment(index, staffId) {
+    walkinServiceAssignments.set(Number(index), normalizeBoardStaffId(staffId));
+}
+
+function toggleWalkinServiceRequest(index, requested) {
+    if (requested) walkinServiceRequests.add(Number(index));
+    else walkinServiceRequests.delete(Number(index));
 }
 
 // ===== Shared booking-style service browse menu (appt + checkout) =====
@@ -16585,7 +16613,7 @@ function schApptRenderSeatTabs() {
     tabs.style.display = 'flex';
     tabs.innerHTML = Array.from({ length: n }, (_, i) => {
         const nameInp = i === 0 ? null : document.getElementById('apptGuestName_' + (i + 1));
-        const label = i === 0 ? 'P1 (booker)' : ('P' + (i + 1) + (nameInp && nameInp.value.trim() ? (': ' + nameInp.value.trim()) : ''));
+            const label = 'C' + (i + 1) + (nameInp && nameInp.value.trim() ? (': ' + nameInp.value.trim()) : '');
         return '<button type="button" class="sch-qb-seat-tab' + (schApptMenu.activeSeat === i ? ' selected' : '') +
             '" onclick="schApptPickSeat(' + i + ')">' + label + '</button>';
     }).join('');
@@ -16806,14 +16834,7 @@ function schApptPickService(serviceId) {
         const row = document.querySelectorAll('#apptServiceRows .multi-row')[seat];
         if (row) setApptServiceRowService(row, svc);
     } else {
-        // Single client: toggle off if already selected as only match on a row; else add/fill empty
-        const existing = rows.find(r => String(r.dataset.serviceId || '') === String(svc.id));
-        if (existing) {
-            existing.remove();
-            updateApptSubtotal();
-            renderSchApptServiceMenu();
-            return;
-        }
+        // Single client: every click adds a service row, including duplicate services.
         const empty = rows.find(r => !r.dataset.serviceId);
         if (empty) setApptServiceRowService(empty, svc);
         else {
@@ -17198,7 +17219,7 @@ function saveWalkin() {
 
     document.getElementById('walkinName').value = '';
     document.getElementById('walkinPhone').value = '';
-    selectedWalkinServices.clear();
+    selectedWalkinServices.length = 0;
     document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
     updateWalkinSubtotal();
 }
@@ -18937,7 +18958,7 @@ function toggleApptPartyGuestFields() {
         return;
     }
     const baseHint = getApptPartyBaseName();
-    let html = '<div style="font-size:0.65rem;color:#9ca3af;margin-bottom:6px;">Seat names — pick each person\'s service below (P1–P' + size + '). Empty seats auto-fill as ' + baseHint + ' #2, #3… Each gets their own calendar block &amp; price.</div>';
+    let html = '<div style="font-size:0.65rem;color:#9ca3af;margin-bottom:6px;">Client names - pick each client\'s service below (C1-C' + size + '). Empty names use the primary client name. Each gets a separate calendar block and price.</div>';
     for (let g = 2; g <= size; g++) {
         const ph = (typeof Utils !== 'undefined' && Utils.partySeatName) ? Utils.partySeatName(baseHint, g - 1) : (baseHint + ' #' + g);
         html += '<div class="form-group" style="margin-bottom:6px;"><label class="form-label">Client ' + g + ' name</label>' +
@@ -19404,8 +19425,9 @@ function saveWalkin() {
     (typeof selectedWalkinServices !== 'undefined' ? selectedWalkinServices : new Set()).forEach(id => {
         const svc = menu.find(s => s.id === id || Number(s.id) === Number(id));
         if (svc) {
-            const assigned = walkinServiceAssignments.has(Number(id))
-                ? walkinServiceAssignments.get(Number(id))
+            const selectionIndex = services.length;
+            const assigned = walkinServiceAssignments.has(selectionIndex)
+                ? walkinServiceAssignments.get(selectionIndex)
                 : ((_walkinStaffRaw === '' || _walkinStaffRaw == null) ? UNASSIGNED_STAFF_ID : normalizeBoardStaffId(_walkinStaffRaw));
             services.push(Object.assign({}, svc, { staffId: assigned }));
         }
@@ -19470,7 +19492,7 @@ function saveWalkin() {
     showToast(useLinked ? ('Walk-in party of ' + partySize + ' — ' + partySize + ' blocks') : 'Walk-in added');
     document.getElementById('walkinName').value = '';
     document.getElementById('walkinPhone').value = '';
-    if (typeof selectedWalkinServices !== 'undefined') selectedWalkinServices.clear();
+    if (typeof selectedWalkinServices !== 'undefined') selectedWalkinServices.length = 0;
     walkinServiceAssignments.clear();
     walkinServiceRequests.clear();
     document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
