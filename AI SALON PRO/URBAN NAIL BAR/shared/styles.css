@@ -13,6 +13,13 @@
     --danger: #dc2626;
     --warning: #f97316;
     --info: #06b6d4;
+
+    /* Shared status colors used by every dashboard and scheduler. */
+    --status-gold: #fbbf24;
+    --status-blue: #2563eb;
+    --status-green: #16a34a;
+    --status-orange: #f97316;
+    --status-red: #dc2626;
     
     --bg-dark: #0a0a0a;
     --bg-card: #1a1a1a;
@@ -345,6 +352,33 @@ code, pre, kbd {
     text-align: center;
     transition: all 0.2s;
     cursor: pointer;
+}
+
+.stat-card.status-gold,
+.stat-card.status-blue,
+.stat-card.status-green,
+.stat-card.status-orange,
+.stat-card.status-red {
+    border-color: var(--status-color);
+}
+
+.stat-card.status-gold { --status-color: var(--status-gold); }
+.stat-card.status-blue { --status-color: var(--status-blue); }
+.stat-card.status-green { --status-color: var(--status-green); }
+.stat-card.status-orange { --status-color: var(--status-orange); }
+.stat-card.status-red { --status-color: var(--status-red); }
+
+.stat-card.status-gold .stat-icon,
+.stat-card.status-gold .stat-value,
+.stat-card.status-blue .stat-icon,
+.stat-card.status-blue .stat-value,
+.stat-card.status-green .stat-icon,
+.stat-card.status-green .stat-value,
+.stat-card.status-orange .stat-icon,
+.stat-card.status-orange .stat-value,
+.stat-card.status-red .stat-icon,
+.stat-card.status-red .stat-value {
+    color: var(--status-color);
 }
 
 .stat-card:hover {

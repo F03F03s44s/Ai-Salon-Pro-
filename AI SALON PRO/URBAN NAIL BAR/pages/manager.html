@@ -115,22 +115,22 @@
                     </button>
                 </div>
                 <div class="stats-grid">
-                    <div class="stat-card clickable" onclick="openDetailModal('appointments')">
+                    <div class="stat-card clickable status-blue" onclick="openDetailModal('appointments')">
                         <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
                         <div class="stat-value" id="dashTodayAppts">0</div>
                         <div class="stat-label">Today's Appointments</div>
                     </div>
-                    <div class="stat-card clickable" onclick="openDetailModal('revenue')">
+                    <div class="stat-card clickable status-green" onclick="openDetailModal('revenue')">
                         <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
                         <div class="stat-value" id="dashTodayRevenue">$0</div>
                         <div class="stat-label">Today's Revenue</div>
                     </div>
-                    <div class="stat-card clickable" onclick="openDetailModal('staff')">
+                    <div class="stat-card clickable status-green" onclick="openDetailModal('staff')">
                         <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
                         <div class="stat-value" id="dashActiveStaff">0</div>
                         <div class="stat-label">Staff On Duty</div>
                     </div>
-                    <div class="stat-card clickable" onclick="openDetailModal('rating')">
+                    <div class="stat-card clickable status-gold" onclick="openDetailModal('rating')">
                         <div class="stat-icon"><i class="fas fa-star"></i></div>
                         <div class="stat-value" id="dashAvgRating">0.0</div>
                         <div class="stat-label">Avg Rating</div>
@@ -180,9 +180,9 @@
             <!-- Schedule -->
             <div id="schedulePage" class="page-content" style="display:none;">
                 <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));">
-                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-user-check"></i></div><div class="stat-value" id="schedClockedIn">0</div><div class="stat-label">Clocked In</div></div>
-                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-user-clock"></i></div><div class="stat-value" id="schedNotIn">0</div><div class="stat-label">Not Clocked In</div></div>
-                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-value" id="schedLate">0</div><div class="stat-label">Late</div></div>
+                    <div class="stat-card status-green"><div class="stat-icon"><i class="fas fa-user-check"></i></div><div class="stat-value" id="schedClockedIn">0</div><div class="stat-label">Checked In</div></div>
+                    <div class="stat-card status-blue"><div class="stat-icon"><i class="fas fa-user-clock"></i></div><div class="stat-value" id="schedNotIn">0</div><div class="stat-label">Waiting</div></div>
+                    <div class="stat-card status-red"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-value" id="schedLate">0</div><div class="stat-label">Late</div></div>
                     <div class="stat-card"><div class="stat-icon"><i class="fas fa-notes-medical"></i></div><div class="stat-value" id="schedSick">0</div><div class="stat-label">Sick</div></div>
                     <div class="stat-card"><div class="stat-icon"><i class="fas fa-umbrella-beach"></i></div><div class="stat-value" id="schedVacation">0</div><div class="stat-label">Vacation</div></div>
                     <div class="stat-card"><div class="stat-icon"><i class="fas fa-phone-slash"></i></div><div class="stat-value" id="schedCalledOff">0</div><div class="stat-label">Called Off</div></div>
@@ -343,12 +343,12 @@
                     </div>
 
                     <div class="stats-grid" style="margin:8px 0 16px;">
-                        <div class="stat-card">
+                        <div class="stat-card status-blue">
                             <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div class="stat-value" id="coTotalAppts">0</div>
                             <div class="stat-label">Appointments</div>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card status-gold">
                             <div class="stat-icon"><i class="fas fa-check-double"></i></div>
                             <div class="stat-value" id="coCompleted">0</div>
                             <div class="stat-label">Completed</div>

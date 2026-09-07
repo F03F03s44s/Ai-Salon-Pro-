@@ -89,22 +89,22 @@
             <!-- Overview Page -->
             <div id="overviewPage" class="page-content">
                 <div class="stats-grid">
-                    <div class="stat-card">
+                    <div class="stat-card status-green">
                         <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
                         <div class="stat-value" id="totalRevenue">$0</div>
                         <div class="stat-label">Total Revenue</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card status-blue">
                         <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
                         <div class="stat-value" id="totalAppointments">0</div>
                         <div class="stat-label">Total Appointments</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card status-blue">
                         <div class="stat-icon"><i class="fas fa-users"></i></div>
                         <div class="stat-value" id="totalClients">0</div>
                         <div class="stat-label">Total Clients</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card status-gold">
                         <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
                         <div class="stat-value" id="totalCloseouts">0</div>
                         <div class="stat-label">Closeout Records</div>
@@ -307,7 +307,7 @@
                             <div class="stat-value" id="moCard">$0</div>
                             <div class="stat-label">Card</div>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card status-gold">
                             <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
                             <div class="stat-value" id="moCompleted">0</div>
                             <div class="stat-label">Services Done</div>
@@ -2423,7 +2423,7 @@
                         <div class="stat-value">${run.totalAppointments}</div>
                         <div class="stat-label">Appointments</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card status-gold">
                         <div class="stat-icon"><i class="fas fa-check-double"></i></div>
                         <div class="stat-value">${run.totalCompleted}</div>
                         <div class="stat-label">Completed</div>
@@ -2433,7 +2433,7 @@
                         <div class="stat-value">${Utils.formatCurrency(run.totalGross)}</div>
                         <div class="stat-label">Gross Sales</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card status-green">
                         <div class="stat-icon"><i class="fas fa-wallet"></i></div>
                         <div class="stat-value" style="color:var(--success);">${Utils.formatCurrency(run.totalPay)}</div>
                         <div class="stat-label">Total Payroll</div>

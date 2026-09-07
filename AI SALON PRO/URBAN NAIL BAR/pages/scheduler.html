@@ -356,13 +356,13 @@ input[type="password"], input[type="email"], input[type="tel"], input[type="numb
 
 .stat-total .label-bottom { color: #d1d5db; }
 
-.stat-complete { background: #000; border-color: var(--theme-primary); }
+.stat-complete { background: #000; border-color: #fbbf24; }
 
 .stat-late { background: #000; border-color: #dc2626; }
 
 .stat-checkout { background: #000; border-color: #f97316; }
 
-.stat-queued { background: #000; border-color: #16a34a; }
+.stat-queued { background: #000; border-color: #2563eb; }
 
 .stat-waiting { background: #000; border-color: #2563eb; }
 
@@ -2933,9 +2933,9 @@ body.is-appt-dragging .appt-block * {
 
                 <div class="stat-box stat-total" onclick="openAllAppointmentsModal('walkins')" style="flex:1 1 0; min-width:0; padding:3px 4px; border-color:var(--theme-primary);"><div class="label-top">Walk-ins</div><div class="number" id="statWalkins" style="color:#fff;">0</div></div>
 
-                <div class="stat-box stat-complete" onclick="openAllAppointmentsModal('complete')" style="flex:1 1 0; min-width:0; padding:3px 4px; border-color:var(--theme-primary);"><div class="label-top">Complete</div><div class="number" id="statCompleted" style="color:var(--theme-primary);">0</div></div>
+                <div class="stat-box stat-complete" onclick="openAllAppointmentsModal('complete')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">Complete</div><div class="number" id="statCompleted" style="color:#fbbf24;">0</div></div>
 
-                <div class="stat-box stat-waiting" onclick="openAllAppointmentsModal('waiting')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">Waitlist</div><div class="number" id="statWaitlist" style="color:#fff;">0</div></div>
+                <div class="stat-box stat-waiting" onclick="openAllAppointmentsModal('waiting')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">Waiting</div><div class="number" id="statWaitlist" style="color:#fff;">0</div></div>
 
                 <div class="stat-box stat-late" onclick="openAllAppointmentsModal('noshow')" style="flex:1 1 0; min-width:0; padding:3px 4px;"><div class="label-top">No Show</div><div class="number" id="statNoshow" style="color:#fff;">0</div></div>
 
@@ -3444,11 +3444,11 @@ body.is-appt-dragging .appt-block * {
                         <div class="calendar-legend-panel">
                             <div class="calendar-legend-title">Colors</div>
                             <div class="calendar-legend-grid">
-                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#fbbf24;"></span>Gold: complete / finished / client ready to leave</div>
-                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#2563eb;"></span>Blue: waiting / in progress / up next / queued</div>
-                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#16a34a;"></span>Green: checked-in / payment paid / transaction accepted</div>
-                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#dc2626;"></span>Red: late / not checked-in / incomplete / declined</div>
-                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#f97316;"></span>Orange: ready for checkout / ready to pay / payment processing</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#fbbf24;"></span>Gold - Complete</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#2563eb;"></span>Blue - Waiting / In Progress</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#16a34a;"></span>Green - Checked In / Paid</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#f97316;"></span>Orange - Checkout / Payment</div>
+                                <div class="calendar-legend-item"><span class="calendar-legend-swatch" style="background:#dc2626;"></span>Red - Late / Declined</div>
                             </div>
                         </div>
                         <div class="calendar-legend-panel">
