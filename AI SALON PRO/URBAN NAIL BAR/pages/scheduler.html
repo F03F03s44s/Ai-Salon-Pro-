@@ -6486,7 +6486,7 @@ let notifActiveTab = 'client';
 
 let apptServiceRowCount = 0;
 
-let selectedWalkinServices = new Set();
+let selectedWalkinServices = [];
 let walkinServiceAssignments = new Map();
 let walkinServiceRequests = new Set();
 
@@ -16379,7 +16379,7 @@ function populateServiceGrid() {
     const services = getSchedulerMenuServices();
     const cats = (typeof Utils !== 'undefined' && Utils.serviceCategories) ? Utils.serviceCategories(services) : [];
     if (!cats.includes(st.serviceCat)) st.serviceCat = cats[0] || 'Manicure';
-    const selected = typeof selectedWalkinServices !== 'undefined' ? selectedWalkinServices : new Set();
+    const selected = typeof selectedWalkinServices !== 'undefined' ? new Set(selectedWalkinServices) : new Set();
     const pills = cats.map(c =>
         '<button type="button" class="sch-qb-pill' + (st.serviceCat === c ? ' selected' : '') +
         '" data-cat="' + schApptEscAttr(c) + '" onclick="window._walkinMenu.serviceCat=this.getAttribute(\'data-cat\');populateServiceGrid()">' + c + '</button>'
@@ -16413,16 +16413,9 @@ function populateServiceGrid() {
 
 function toggleWalkinService(id) {
     const nid = Number(id);
-    if (selectedWalkinServices.has(nid) || selectedWalkinServices.has(id)) {
-        selectedWalkinServices.delete(nid);
-        selectedWalkinServices.delete(id);
-        walkinServiceAssignments.delete(nid);
-        walkinServiceRequests.delete(nid);
-    } else {
-        selectedWalkinServices.add(nid);
-        const fallbackStaff = document.getElementById('walkinStaff');
-        walkinServiceAssignments.set(nid, fallbackStaff && fallbackStaff.value ? Number(fallbackStaff.value) : 0);
-    }
+    const fallbackStaff = document.getElementById('walkinStaff');
+    selectedWalkinServices.push(nid);
+    walkinServiceAssignments.set(selectedWalkinServices.length - 1, fallbackStaff && fallbackStaff.value ? Number(fallbackStaff.value) : 0);
     updateWalkinSubtotal();
     renderWalkinServiceAssignments();
     if (typeof populateServiceGrid === 'function') populateServiceGrid();
@@ -16435,33 +16428,54 @@ function renderWalkinServiceAssignments() {
     const staff = typeof bookableStoreStaff === 'function' ? bookableStoreStaff() : (store.staff || []);
     const staffOptions = '<option value="0">Open / Unassigned</option>' +
         staff.map(s => '<option value="' + s.id + '">' + schQbEscAttr(s.name) + '</option>').join('');
-    const services = Array.from(selectedWalkinServices)
-        .map(id => menu.find(s => Number(s.id) === Number(id)))
-        .filter(Boolean);
+    const services = selectedWalkinServices
+        .map((id, index) => ({ svc: menu.find(s => Number(s.id) === Number(id)), index }))
+        .filter(entry => entry.svc)
+        .map(entry => ({ ...entry.svc, selectionIndex: entry.index }))
+        ;
     if (!services.length) {
         container.innerHTML = '<div style="color:#6b7280;font-size:0.7rem;text-align:center;padding:12px 6px;">Choose one or more services above to assign staff.</div>';
         return;
     }
     container.innerHTML = services.map(s => {
-        const id = Number(s.id);
-        const assigned = walkinServiceAssignments.has(id) ? walkinServiceAssignments.get(id) : 0;
-        const requested = walkinServiceRequests.has(id) ? ' checked' : '';
+        const assigned = walkinServiceAssignments.has(s.selectionIndex) ? walkinServiceAssignments.get(s.selectionIndex) : 0;
+        const requested = walkinServiceRequests.has(s.selectionIndex) ? ' checked' : '';
         return '<div class="walkin-assignment-row">' +
             '<div><div class="walkin-assignment-name">' + schQbEscAttr(s.name) + '</div><div class="walkin-assignment-meta">' + formatServicePriceLabel(s) + ' · ' + (s.duration || 30) + ' min</div></div>' +
-            '<select class="form-select" aria-label="Technician for ' + schQbEscAttr(s.name) + '" onchange="updateWalkinServiceAssignment(' + id + ', this.value)">' +
+            '<select class="form-select" aria-label="Technician for ' + schQbEscAttr(s.name) + '" onchange="updateWalkinServiceAssignment(' + s.selectionIndex + ', this.value)">' +
             staffOptions.replace('value="' + assigned + '"', 'value="' + assigned + '" selected') + '</select>' +
-            '<label class="walkin-assignment-request" title="Client requested this technician"><input type="checkbox" ' + requested + ' onchange="toggleWalkinServiceRequest(' + id + ', this.checked)"> <i class="fas fa-star"></i></label>' +
+            '<label class="walkin-assignment-request" title="Client requested this technician"><input type="checkbox" ' + requested + ' onchange="toggleWalkinServiceRequest(' + s.selectionIndex + ', this.checked)"> <i class="fas fa-star"></i></label>' +
+            '<button type="button" class="remove-btn" title="Remove this service" onclick="removeWalkinService(' + s.selectionIndex + ')"><i class="fas fa-minus"></i></button>' +
             '</div>';
     }).join('');
 }
 
-function updateWalkinServiceAssignment(serviceId, staffId) {
-    walkinServiceAssignments.set(Number(serviceId), normalizeBoardStaffId(staffId));
+function removeWalkinService(index) {
+    selectedWalkinServices.splice(index, 1);
+    const assignments = new Map();
+    const requests = new Set();
+    walkinServiceAssignments.forEach((staffId, key) => {
+        if (key < index) assignments.set(key, staffId);
+        if (key > index) assignments.set(key - 1, staffId);
+    });
+    walkinServiceRequests.forEach(key => {
+        if (key < index) requests.add(key);
+        if (key > index) requests.add(key - 1);
+    });
+    walkinServiceAssignments = assignments;
+    walkinServiceRequests = requests;
+    updateWalkinSubtotal();
+    renderWalkinServiceAssignments();
+    populateServiceGrid();
 }
 
-function toggleWalkinServiceRequest(serviceId, requested) {
-    if (requested) walkinServiceRequests.add(Number(serviceId));
-    else walkinServiceRequests.delete(Number(serviceId));
+function updateWalkinServiceAssignment(index, staffId) {
+    walkinServiceAssignments.set(Number(index), normalizeBoardStaffId(staffId));
+}
+
+function toggleWalkinServiceRequest(index, requested) {
+    if (requested) walkinServiceRequests.add(Number(index));
+    else walkinServiceRequests.delete(Number(index));
 }
 
 // ===== Shared booking-style service browse menu (appt + checkout) =====
@@ -16806,14 +16820,7 @@ function schApptPickService(serviceId) {
         const row = document.querySelectorAll('#apptServiceRows .multi-row')[seat];
         if (row) setApptServiceRowService(row, svc);
     } else {
-        // Single client: toggle off if already selected as only match on a row; else add/fill empty
-        const existing = rows.find(r => String(r.dataset.serviceId || '') === String(svc.id));
-        if (existing) {
-            existing.remove();
-            updateApptSubtotal();
-            renderSchApptServiceMenu();
-            return;
-        }
+        // Single client: every click adds a service row, including duplicate services.
         const empty = rows.find(r => !r.dataset.serviceId);
         if (empty) setApptServiceRowService(empty, svc);
         else {
@@ -17198,7 +17205,7 @@ function saveWalkin() {
 
     document.getElementById('walkinName').value = '';
     document.getElementById('walkinPhone').value = '';
-    selectedWalkinServices.clear();
+    selectedWalkinServices.length = 0;
     document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
     updateWalkinSubtotal();
 }
@@ -19404,8 +19411,9 @@ function saveWalkin() {
     (typeof selectedWalkinServices !== 'undefined' ? selectedWalkinServices : new Set()).forEach(id => {
         const svc = menu.find(s => s.id === id || Number(s.id) === Number(id));
         if (svc) {
-            const assigned = walkinServiceAssignments.has(Number(id))
-                ? walkinServiceAssignments.get(Number(id))
+            const selectionIndex = services.length;
+            const assigned = walkinServiceAssignments.has(selectionIndex)
+                ? walkinServiceAssignments.get(selectionIndex)
                 : ((_walkinStaffRaw === '' || _walkinStaffRaw == null) ? UNASSIGNED_STAFF_ID : normalizeBoardStaffId(_walkinStaffRaw));
             services.push(Object.assign({}, svc, { staffId: assigned }));
         }
@@ -19470,7 +19478,7 @@ function saveWalkin() {
     showToast(useLinked ? ('Walk-in party of ' + partySize + ' — ' + partySize + ' blocks') : 'Walk-in added');
     document.getElementById('walkinName').value = '';
     document.getElementById('walkinPhone').value = '';
-    if (typeof selectedWalkinServices !== 'undefined') selectedWalkinServices.clear();
+    if (typeof selectedWalkinServices !== 'undefined') selectedWalkinServices.length = 0;
     walkinServiceAssignments.clear();
     walkinServiceRequests.clear();
     document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
